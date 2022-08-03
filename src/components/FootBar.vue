@@ -1,13 +1,12 @@
 <template>
-  
+  <div class="footbar"></div>
 </template>
 
 <script>
 export default {
-  name: '',
+  name: 'FootBar'
 }
 </script>
-
 
 <style scoped lang="scss">
 
