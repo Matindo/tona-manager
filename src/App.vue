@@ -20,10 +20,25 @@ export default {
 
 <style lang="scss">
 #app {
-  height: 125vh;
-  background-image: url('https://codetheweb.blog/assets/img/posts/style-a-navigation-bar-css/background.jpg');
+  background: url('https://codetheweb.blog/assets/img/posts/style-a-navigation-bar-css/background.jpg') no-repeat center center fixed;
   background-size: cover;
+  -moz-background-size: cover;
+  -webkit-background-size: cover;
+  -o-background-size: cover;
   font-family: sans-serif;
   color: white;
+}
+
+.container > .row {
+  padding: 2em;
+  margin-bottom: 1.5em;
+  border-radius: 5px;
+  background-color: rgba(255, 255, 255, 0.938);
+  box-shadow: 0 0 .5em .2em rgba(0, 0, 0, 0.712);
+  color: black;
+}
+
+.main {
+  margin-top: 1rem;
 }
 </style>
