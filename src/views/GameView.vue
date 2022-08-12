@@ -92,7 +92,7 @@
 </template>
 
 <script>
-import TournTable from '@/components/TournTable.vue'
+import TournTable from '@/components/TournsTable.vue'
 import TournSummary from '@/components/TournSummary.vue'
 
 export default {
@@ -115,7 +115,7 @@ export default {
         { text: '- select tournament type -', value: null },
         { text: 'Knockouts Only', value: 'K' },
         { text: 'Preliminaries(Rounds) Only', value: 'P' },
-        { text: 'Preliminaries and/then Knockouts', value: 'PK', selected: 'true' }
+        { text: 'Preliminaries and/then Knockouts', value: 'PK' }
       ],
       completeTournaments: [
         { id: '656', name: 'Test Tournament 1', details: 'fjdfdjfdjhfxjdfsjtszhtshdsyreahteautzhgdhxtdsrjdsayresursyreardxdssyteersttreeayt dutrduuy utryrsdsurstrstrs' },

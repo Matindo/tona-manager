@@ -38,7 +38,8 @@ export default {
   color: black;
 }
 
-.main {
-  margin-top: 1rem;
+.container > .row:first-child {
+  margin-top: 2rem;
 }
+
 </style>
