@@ -34,8 +34,9 @@
 <script>
 import TournTable from '@/components/TournTable.vue'
 import { mapGetters } from 'vuex'
+import KnockOuts from '@/components/KnockOuts.vue'
 export default {
-  components: { TournTable },
+  components: { TournTable, KnockOuts },
   name: 'TournamentView',
   data: function () {
     return {
