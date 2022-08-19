@@ -1,5 +1,5 @@
 <template>
-  <b-table responsive bordered dark :fields="tableFields" :items="tournaments" :title="title" hover striped sticky-header>
+  <b-table responsive bordered dark :fields="tableFields" :items="tournaments" :title="title" hover striped sticky-header show-empty>
     <template #row-details="row">
       <b-tr @click="openTournament(row.item.id)">
         <b-td>{{row.item.id}}</b-td>

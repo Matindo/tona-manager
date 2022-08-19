@@ -2,13 +2,19 @@ export const canvasMixin = {
   data: function () {
     return {
       ctx: null,
+      canvasWidth: 0,
+      canvasHeight: 0,
       totalTeams: 0,
-      teamWidth: 50,
-      teamHeight: 30,
-      scoreWidth: 20,
-      scoreHeight: 10,
+      tempTeams: 0,
+      teamWidth: 90,
+      teamHeight: 70,
+      scoreWidth: 30,
+      scoreHeight: 20,
       lineSpan: 10,
-      connectors: []
+      connectors: [],
+      leftCoordinates: [],
+      rightCoordinates: [],
+      winnerCoordinates: { imagePoint: [], namePoint: [] }
     }
   },
   computed: {
@@ -38,49 +44,25 @@ export const canvasMixin = {
     },
     maxRoundMatches: function () {
       return this.maxRoundTeams / 2
-    },
-    round: function () {
-      let roundName
-      switch (this.rounds) {
-        case (1):
-          roundName = 'F'
-          break
-        case (2):
-          roundName = 'SF'
-          break
-        case (3):
-          roundName = 'QF'
-          break
-        case (4):
-          roundName = 'R16'
-          break
-        case (5):
-          roundName = 'R32'
-          break
-        case (6):
-          roundName = 'R64'
-          break
-        case (7):
-          roundName = 'R128'
-          break
-        default:
-          roundName = 'R256'
-          break
-      }
-      return roundName
     }
   },
   methods: {
+    setSize: function (canvas) {
+      this.canvasWidth = ((((this.teamWidth + this.scoreWidth + this.lineSpan) * this.rounds) + (this.lineSpan * (this.rounds - 1))) * 2) + ((this.lineSpan * 2) + this.teamWidth) + 20
+      this.canvasHeight = (this.maxRoundMatches * ((this.teamHeight * 2) + 6)) + 25
+      canvas.height = this.canvasHeight
+      canvas.width = this.canvasWidth
+    },
     draw: function () {
-      this.ctx = document.getElementById('viewer').getContext('2d')
+      const canvas = document.getElementById('viewer')
+      this.setSize(canvas)
+      this.ctx = canvas.getContext('2d')
       const ctx = this.ctx
       ctx.lineCap = 'butt'
       ctx.lineJoin = 'miter'
-      ctx.font = '.5rem Times New Roman'
-      this.drawQuarterFinals(ctx)
-    },
-    drawQuarterFinals: function (ctx) {
+      ctx.font = '.8rem Times New Roman'
       this.drawLeftSide()
+      this.drawRightSide()
     },
     drawLine: function (ctx, begin, end, stroke = 'black', width = '1') {
       if (stroke) {
@@ -103,48 +85,44 @@ export const canvasMixin = {
     addText: function (ctx, text, position) {
       ctx.fillText(text, position[0], position[1])
     },
-    drawLeftSide: function () {
-      let position
-      if (this.connectors.length > 0) {
-        const y = this.connectors[0][1] - ((this.teamHeight / 2) + 2)
-        position = [this.connectors[0][0], y]
-      } else {
-        position = [10, 10]
-      }
-      const sideRounds = this.rounds
-      for (var i = 0; i < sideRounds; i++) {
-        this.drawRound(this.ctx, position)
-        this.totalTeams = this.totalTeams / 2
-      }
-    },
-    drawFinalTeamLeft: function (ctx, position) {
-      const pos = [position[0], position[1] - (this.teamHeight / 2)]
-      const finalTeamLeft = this.drawObject(ctx, pos)
-      this.drawFinalConnector(ctx, finalTeamLeft.connectorPoint)
-    },
-    drawObject: function (ctx, position, side = 'L', points = 'score') {
-      const teamX = position[0]
+    drawObject: function (ctx, position, side = 'L') {
+      let teamX
       const teamY = position[1]
       let scoreX, lineFromX, lineToX
       if (side === 'R') {
-        scoreX = teamX - (this.teamWidth + this.scoreWidth)
+        teamX = position[0] - this.teamWidth
+        scoreX = teamX - this.scoreWidth
         lineFromX = scoreX
         lineToX = lineFromX - this.lineSpan
       } else {
+        teamX = position[0]
         scoreX = teamX + this.teamWidth
         lineFromX = scoreX + this.scoreWidth
         lineToX = lineFromX + this.lineSpan
       }
       const scoreTextX = scoreX + 1
       const scoreY = teamY + ((this.teamHeight - this.scoreHeight) / 2)
-      const scoreTextY = scoreY + 7
+      const scoreTextY = scoreY + (0.7 * this.scoreHeight)
       const lineY = scoreY + (this.scoreHeight / 2)
-      ctx.fillRect(teamX, teamY, this.teamWidth, this.teamHeight)
+      this.drawRect(ctx, [teamX, teamY], [this.teamWidth, this.teamHeight])
       this.drawRect(ctx, [scoreX, scoreY], [this.scoreWidth, this.scoreHeight])
-      this.addText(ctx, points, [scoreTextX, scoreTextY])
       this.drawLine(ctx, [lineFromX, lineY], [lineToX, lineY])
-      const objectDetails = { start: position, end: [teamX, (teamY + this.teamHeight + 2)], connectorPoint: [lineToX, lineY], points: points }
+      const objectDetails = { start: position, end: [teamX, (teamY + this.teamHeight + 2)], connectorPoint: [lineToX, lineY] }
+      if (side === 'R') {
+        this.rightCoordinates.push({ imagePoint: [(position[0] - this.teamWidth + 1), (position[1] + 1)], scorePoint: [scoreTextX, scoreTextY] })
+      } else {
+        this.leftCoordinates.push({ imagePoint: [(position[0] + 1), (position[1] + 1)], scorePoint: [scoreTextX, scoreTextY] })
+      }
       return objectDetails
+    },
+    drawFinalTeam: function (ctx, position, side = 'L') {
+      const pos = [position[0], position[1] - (this.teamHeight / 2)]
+      if (side === 'R') {
+        this.drawObject(ctx, pos, 'R')
+      } else {
+        const finalTeamLeft = this.drawObject(ctx, pos)
+        this.drawFinalConnector(ctx, finalTeamLeft.connectorPoint)
+      }
     },
     drawConnector: function (ctx, team1ConnectorPoint, team2ConnectorPoint, side = 'L') {
       let lineToX
@@ -166,11 +144,15 @@ export const canvasMixin = {
       const line2FromX = line1ToX + this.teamWidth
       const line2ToX = line2FromX + this.lineSpan
       const lineY = point[1]
-      const teamWinnerY = lineY - (this.teamHeight / 2) + 8
-      const textWinnerX = line1ToX + 1
-      const textWinnerY = teamWinnerY - 33
+      const teamWinnerY = lineY - (this.teamHeight / 2) + 17
+      const textWinnerX = line1ToX + 15
+      const textWinnerY = teamWinnerY - 13
       this.drawLine(ctx, point, [line1ToX, lineY])
       this.drawRect(ctx, [line1ToX, teamWinnerY], [this.teamWidth, this.teamHeight / 2])
+      this.winnerCoordinates.imagePoint[0] = line1ToX + 1
+      this.winnerCoordinates.imagePoint[1] = teamWinnerY + 1
+      this.winnerCoordinates.namePoint[0] = line1ToX + (this.teamWidth / 4)
+      this.winnerCoordinates.namePoint[1] = teamWinnerY + (this.teamHeight / 2) + 7
       this.drawLine(ctx, [line2FromX, lineY], [line2ToX, lineY])
       this.addText(ctx, 'WINNER', [textWinnerX, textWinnerY])
     },
@@ -180,7 +162,7 @@ export const canvasMixin = {
         object1 = this.drawObject(ctx, [position1[0], position1[1] + 2], side)
         object2 = this.drawObject(ctx, [position2[0], position2[1] + 2], side)
         matchConnectorPoint = this.drawConnector(ctx, object1.connectorPoint, object2.connectorPoint, side)
-        return { start: position1, end: object2.end, point: matchConnectorPoint }
+        return { start: position1, end: [object2.end[0] + this.teamWidth, object2.end[1]], point: matchConnectorPoint }
       }
       object1 = this.drawObject(ctx, [position1[0], position1[1] + 2])
       object2 = this.drawObject(ctx, [position2[0], position2[1] + 2])
@@ -193,7 +175,11 @@ export const canvasMixin = {
       for (var i = 0; i < this.maxRoundMatches; i++) {
         let pos1, pos2, match
         if (this.connectors.length === 1) {
-          this.drawFinalTeamLeft(ctx, [this.connectors[0][0], this.connectors[0][1]])
+          if (side === 'R') {
+            this.drawFinalTeam(ctx, [this.connectors[0][0], this.connectors[0][1]], 'R')
+          } else {
+            this.drawFinalTeam(ctx, [this.connectors[0][0], this.connectors[0][1]])
+          }
         } else if (this.connectors.length > 1) {
           const j = i * 2
           pos1 = [this.connectors[j][0], this.connectors[j][1] - (this.teamHeight / 2)]
@@ -218,6 +204,34 @@ export const canvasMixin = {
       }
       this.connectors.splice(0, this.connectors.length)
       this.connectors = matchConnectors
+    },
+    drawLeftSide: function () {
+      let position
+      this.tempTeams = this.totalTeams
+      if (this.connectors.length > 0) {
+        const y = this.connectors[0][1] - ((this.teamHeight / 2) + 2)
+        position = [this.connectors[0][0], y]
+      } else {
+        position = [10, 22]
+      }
+      for (var sideRounds = this.rounds; sideRounds > 0; sideRounds--) {
+        this.drawRound(this.ctx, position)
+        this.totalTeams = this.totalTeams / 2
+      }
+    },
+    drawRightSide: function () {
+      let position
+      this.totalTeams = this.tempTeams
+      if (this.connectors.length > 0) {
+        const y = this.connectors[0][1] - ((this.teamHeight / 2) + 2)
+        position = [this.connectors[0][0], y]
+      } else {
+        position = [(this.canvasWidth - 10), 22]
+      }
+      for (var sideRounds = this.rounds; sideRounds > 0; sideRounds--) {
+        this.drawRound(this.ctx, position, 'R')
+        this.totalTeams = this.totalTeams / 2
+      }
     }
   }
 }

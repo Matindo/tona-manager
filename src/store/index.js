@@ -22,6 +22,9 @@ export default new Vuex.Store({
     },
     SET_TOURNS: function (state, payload) {
       state.tournaments = payload
+    },
+    END_TOURN: function (state) {
+      state.tournament.status = 'Completed'
     }
   },
   actions: {
@@ -30,6 +33,9 @@ export default new Vuex.Store({
     },
     SET_TOURNAMENTS: function (context, payload) {
       context.commit('SET_TOURNS', payload)
+    },
+    END_TOURNAMENT: function (context) {
+      context.commit('END_TOURN')
     }
   },
   modules: {
