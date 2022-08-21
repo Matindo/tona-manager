@@ -1,5 +1,9 @@
 <template>
-  <div class="footbar"></div>
+  <div class="footbar">
+    <b-row>
+      <b-col></b-col>
+    </b-row>
+  </div>
 </template>
 
 <script>
@@ -9,5 +13,12 @@ export default {
 </script>
 
 <style scoped lang="scss">
-
+.footbar {
+  bottom: 0;
+  width: 100vw;
+  display: inline-flex;
+  flex-direction: row;
+  justify-content: baseline;
+  align-items: stretch;
+}
 </style>
