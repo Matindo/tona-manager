@@ -27,6 +27,7 @@ export default {
   -o-background-size: cover;
   font-family: sans-serif;
   color: white;
+  transition: all .7s;
 }
 
 .container > .row {
