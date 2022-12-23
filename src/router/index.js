@@ -11,11 +11,6 @@ const routes = [
     component: HomeView
   },
   {
-    path: '/games',
-    name: 'games',
-    component: () => import('../views/GameView.vue')
-  },
-  {
     path: '/events',
     name: 'events',
     component: () => import('../views/EventView.vue')
