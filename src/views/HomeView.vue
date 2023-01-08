@@ -7,7 +7,7 @@
         <b-tab title="Start New Tournament">
           <b-card-title>Enter the details of your tournament below to begin</b-card-title>
           <b-card-text>
-            <tournament-form />
+            <tournament-form @clickSubmit="createTournament" />
           </b-card-text>
         </b-tab>
         <b-tab title="Resume Tournament">
@@ -47,6 +47,17 @@ export default {
         { id: '659', name: 'Test Tournament 4', details: 'fjdfdjfdjhfxjdfsjtszhtshdsyreahteautzhgdhxtdsrjdsayresursyreardxdssyteersttreeayt dutrduuy utryrsdsurstrstrs' }
       ],
       runningTournaments: []
+    }
+  },
+  methods: {
+    createTournament: function (tournament) {
+      const formData = new FormData()
+      formData.append('tName', tournament.tournName)
+      formData.append('tLocation', tournament.tournPlace)
+      formData.append('tType', tournament.tournType)
+      formData.append('tDate', tournament.startDate)
+      formData.append('tPrem', tournament.premRounds)
+      formData.append('tKO', tournament.koRounds)
     }
   }
 }

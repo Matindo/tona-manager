@@ -1,20 +1,48 @@
 <template>
   <div id="app">
-    <nav-bar />
+    <nav-bar @signInUser="login" @searchTournament="search" />
     <router-view v-slot="{ Component, route }">
       <transition :name="route.meta.transitionName">
         <component :is="Component" :key="route.path" />
       </transition>
     </router-view>
     <foot-bar />
+    <b-modal centered id="loginModal" hide-footer hide-header>
+      <b-form id="login-form" @submit.prevent="signIn">
+        <b-form-fieldset label="E-mail">
+          <b-input type="email" v-model="credentials.email" autocomplete placeholder="email@example.com" required />
+        </b-form-fieldset>
+        <b-form-fieldset label="Password">
+          <b-input type="password" v-model="credentials.pword" autocomplete required />
+        </b-form-fieldset>
+        <div class="form-footer">
+          <b-button variant="outline-primary" pill size="sm" type="submit">SIGN iN</b-button>
+          <b-button variant="outline-secondary" pill size="sm" @click="$bvModal.hide('loginModal')">CANCEL</b-button>
+        </div>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import FootBar from './components/FootBar.vue'
 import NavBar from './components/NavBar.vue'
+
 export default {
-  components: { NavBar, FootBar }
+  components: { NavBar, FootBar },
+  data: function () {
+    return {
+      credentials: { email: '', pword: '' }
+    }
+  },
+  methods: {
+    search: function (searchQuery) {
+      // handle search here
+    },
+    login: function () {
+      this.$bvModal.show('loginModal')
+    }
+  }
 }
 </script>
 
@@ -27,7 +55,8 @@ export default {
   -o-background-size: cover;
   font-family: sans-serif;
   color: white;
-  transition: all .7s;
+  transition: all .1s linear;
+  width: 100dvw;
 }
 
 .container > .row {
@@ -41,6 +70,33 @@ export default {
 
 .container > .row:first-child {
   margin-top: 2rem;
+}
+
+#login-form{
+  padding: 1rem 2rem;
+  input {
+    margin: 0.125rem 0;
+    border: none;
+    border-bottom: 0.125em hsl(146, 50%, 36%);
+    background-color: hsl(208, 100%, 97%);
+    &:active {
+      border-bottom: 0.19em hsl(146, 90%, 16%);
+      color: hsl(0, 7%, 3%);
+    }
+  }
+}
+
+.form-footer {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-evenly;
+  & > * {
+    flex-grow: 1;
+    text-align: center;
+    margin: 1rem .25rem;
+  }
 }
 
 </style>

@@ -6,19 +6,15 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
-    component: HomeView
+    component: HomeView,
+    alias: '/'
   },
   {
     path: '/events',
     name: 'events',
     component: () => import('../views/EventView.vue')
-  },
-  {
-    path: '/team',
-    name: 'team',
-    component: () => import('../views/TeamView.vue')
   },
   {
     path: '/account',

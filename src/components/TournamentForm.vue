@@ -44,6 +44,7 @@ export default {
     return {
       firstDate: minDate,
       lastDate: maxDate,
+      today: nowDate,
       showForm: true,
       tournTypes: [
         { text: '- select tournament type -', value: null },
@@ -52,20 +53,20 @@ export default {
         { text: 'Preliminaries and/then Knockouts', value: 'PK' }
       ],
       tournament: {
-        tournName: '', tournPlace: '', tournType: null, startDate: nowDate, premRounds: 0, koRounds: 0
+        tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0
       }
     }
   },
   methods: {
-    createTournament: function () {
-      // create new tournament
-    },
     resetForm: function () {
       this.showForm = false
       this.$nextTick(() => {
-        this.tournament = { tournName: '', tournType: null, totalTeams: 0, teamSize: 0, premRounds: 0, koRounds: 0, startDate: this.today, endDate: null }
+        this.tournament = { tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0 }
       })
       this.showForm = true
+    },
+    submitForm: function () {
+      this.$emit('clickSubmit', this.tournament)
     }
   }
 }
