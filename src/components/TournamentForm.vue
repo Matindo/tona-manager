@@ -7,11 +7,11 @@
       </div>
       <div class="form-input-group">
         <label for="tournPlace">Location/Region:</label>
-        <b-form-input id="tournName" v-model="tournament.tournName" placeholder="Tournament One" required />
+        <b-form-input id="tournPlace" v-model="tournament.tournPlace" placeholder="Stars School/Northern Region" required />
       </div>
       <div class="form-input-group">
-        <label for="tournPlace">Tournament Type:</label>
-        <b-form-input id="tournPlace" v-model="tournament.tournPlace" placeholder="Stars School/Northern Region" required />
+        <label for="tournType">Tournament Type:</label>
+        <b-form-select id="tournType" v-model="tournament.tournType" :options="tournTypes" required />
       </div>
       <div class="form-input-group">
         <label for="startDate">Start Date:</label>
@@ -53,7 +53,7 @@ export default {
         { text: 'Preliminaries and/then Knockouts', value: 'PK' }
       ],
       tournament: {
-        tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0
+        tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0, teams: []
       }
     }
   },
@@ -61,11 +61,11 @@ export default {
     resetForm: function () {
       this.showForm = false
       this.$nextTick(() => {
-        this.tournament = { tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0 }
+        this.tournament = { tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0, teams: [] }
       })
       this.showForm = true
     },
-    submitForm: function () {
+    createTournament: function () {
       this.$emit('clickSubmit', this.tournament)
     }
   }

@@ -41,7 +41,16 @@ export default {
     },
     login: function () {
       this.$bvModal.show('loginModal')
+    },
+    signIn: function () {
+      // do somn
     }
+  },
+  beforeMount: async function () {
+    await this.$store.dispatch('INITIALIZE')
+  },
+  beforeDestroy: async function () {
+    await this.$store.dispatch('TERMINATE')
   }
 }
 </script>

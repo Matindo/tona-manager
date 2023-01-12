@@ -32,6 +32,9 @@ export default new Vuex.Store({
     SET_TOURN: function (state, payload) {
       state.tournament = payload
     },
+    ADD_TOURN: function (state, tourn) {
+      state.tournaments.push(tourn)
+    },
     SET_TOURNS: function (state, payload) {
       state.tournaments = payload
     },
@@ -40,17 +43,35 @@ export default new Vuex.Store({
     },
     SET_TEAMS: function (state, payload) {
       state.teams = payload
+      localStorage.setItem('tourn_teams', JSON.stringify(state.teams))
     },
     END_TOURN: function (state) {
       state.tournament.status = 'Completed'
     },
     LOGOUT_USER: function (state) {
       state.user = { live: false }
+    },
+    SAVE_DATA: function (state) {
+      localStorage.setItem('tournaments', JSON.stringify(state.tournaments))
+      localStorage.setItem('teams', JSON.stringify(state.teams))
     }
   },
   actions: {
+    INITIALIZE: function (context) {
+      if (localStorage.getItem('tournaments')) {
+        const tourns = JSON.parse(localStorage.getItem('tournaments'))
+        context.commit('SET_TOURNS', tourns)
+      }
+      if (localStorage.getItem('teams')) {
+        const teams = JSON.parse(localStorage.getItem('teams'))
+        context.commit('SET_TEAMS', teams)
+      }
+    },
     SET_TOURNAMENT: function (context, payload) {
       context.commit('SET_TOURN', payload)
+    },
+    CREATE_TOURNAMENT: function (context, payload) {
+      context.commit('ADD_TOURN', payload)
     },
     SET_TOURNAMENTS: function (context, payload) {
       context.commit('SET_TOURNS', payload)
@@ -66,6 +87,9 @@ export default new Vuex.Store({
     },
     SIGNOUT_USER: function (context) {
       context.commit('LOGOUT_USER')
+    },
+    TERMINATE: function (context) {
+      context.commit('SAVE_DATA')
     }
   },
   modules: {
