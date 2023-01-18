@@ -1,25 +1,23 @@
 <template>
-  <b-container>
-    <b-row class="main">
-      <h2>Open Tournaments</h2>
-      <div class="container w-100">
-        <div id="tournament-register">
-          <p>Create your new tournament here:</p>
-          <tournament-form @clickSubmit="createTournament" />
-        </div>
-        <div id="tournaments-view">
-          <div class="table-row" v-for="(tourn, index) in tournaments" :key="index">
-            <div class="table-column name">{{ tourn.tournName }}</div>
-            <div class="table-column region">{{ tourn.tournPlace }}</div>
-            <div class="table-column type">{{ tourn.tournType }}</div>
-            <div class="table-column date">{{ tourn.startDate }}</div>
-            <div class="table-column actions">
-              <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournName)"><b-icon icon="box-arrow-in-right"></b-icon> Open</b-button>
-            </div>
+  <div id="home">
+    <h2>Open Tournaments</h2>
+    <div class="container w-100">
+      <div id="tournament-register">
+        <p>Create your new tournament here:</p>
+        <tournament-form @clickSubmit="createTournament" />
+      </div>
+      <div id="tournaments-view">
+        <div class="table-row" v-for="(tourn, index) in tournaments" :key="index">
+          <div class="table-column name">{{ tourn.tournName }}</div>
+          <div class="table-column region">{{ tourn.tournPlace }}</div>
+          <div class="table-column type">{{ tourn.tournType }}</div>
+          <div class="table-column date">{{ tourn.startDate }}</div>
+          <div class="table-column actions">
+            <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournName)"><b-icon icon="box-arrow-in-right"></b-icon> Open</b-button>
           </div>
         </div>
       </div>
-    </b-row>
+    </div>
     <!--b-row class="second">
       <h2>Completed Tournaments</h2>
       <div class="container w-100">
@@ -28,7 +26,7 @@
         </div>
       </div>
     </b-row-->
-  </b-container>
+  </div>
 </template>
 
 <script>
@@ -75,20 +73,26 @@ export default {
 }
 </script>
 
-<style scoped lang="scss">
-.second {
+<style scoped>
+#home {
   display: flex;
   flex-direction: column;
-  padding: 1em;
-  .container {
-    padding: 7px;
-  }
+  margin: min(2%, 1.5em) min(4%, 3em);
+  padding: 2em;
+  color: hsl(0 1% 14%);
+  background-color: hsl(60 56% 91% / .75);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 .5rem .2rem hsl(0 0% 0% / .47);
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border-radius: 1em;
+  overflow: hidden;
 }
 .table-row {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  .table-column {
+}
+.table-column {
     display: flex;
     width: max-content;
     align-items: center;
@@ -96,5 +100,4 @@ export default {
     flex-grow: 1;
     margin-inline: .5rem;
   }
-}
 </style>

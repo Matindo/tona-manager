@@ -40,10 +40,19 @@ export default {
 <style scoped>
 #tournament_view {
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  color: black;
+  text-align: center;
+  flex-direction: column;
+  margin: 2em 4em;
+  padding: 5em;
+  color: hsl(0 1% 14%);
+  background-color: hsl(60 56% 91% / .75);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 .5rem .2rem hsl(0 0% 0% / .47);
+  border: 1px solid rgba( 255, 255, 255, 0.18 );
+  border-radius: 1em;
+  overflow: hidden;
 }
 .table-row {
   display: flex;
