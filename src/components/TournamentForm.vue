@@ -3,25 +3,25 @@
     <div class="form-body">
       <div class="form-input-group">
         <label for="tournName">Tournament Name:</label>
-        <b-form-input id="tournName" v-model="tournament.tournName" placeholder="Tournament One" required />
+        <b-form-input id="tournName" v-model="tournament.tName" placeholder="Tournament One" required />
       </div>
       <div class="form-input-group">
         <label for="tournPlace">Location/Region:</label>
-        <b-form-input id="tournPlace" v-model="tournament.tournPlace" placeholder="Stars School/Northern Region" required />
+        <b-form-input id="tournPlace" v-model="tournament.tPlace" placeholder="Stars School/Northern Region" required />
       </div>
       <div class="form-input-group">
         <label for="tournType">Tournament Type:</label>
-        <b-form-select id="tournType" v-model="tournament.tournType" :options="tournTypes" required />
+        <b-form-select id="tournType" v-model="tournament.tType" :options="tTypes" required />
       </div>
       <div class="form-input-group">
         <label for="startDate">Start Date:</label>
-        <b-form-datepicker id="startDate" v-model="tournament.startDate" :min="firstDate" :max="lastDate" :date-format-options="{ year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' }" locale="en" required />
+        <b-form-datepicker id="startDate" v-model="tournament.start" :min="firstDate" :max="lastDate" :date-format-options="{ year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' }" locale="en" required />
       </div>
-      <div class="form-input-group" v-show="tournament.tournType !== 'K'">
+      <div class="form-input-group" v-show="tournament.tType !== 'K'">
         <label for="premRounds">Preliminary Rounds:</label>
         <b-form-input id="premRounds" v-model.number="tournament.premRounds" min="0" type="number" />
       </div>
-      <div class="form-input-group" v-show="tournament.tournType !== 'P'">
+      <div class="form-input-group" v-show="tournament.tType !== 'P'">
         <label for="koRounds" label-cols="12">Knock-Out Rounds:</label>
         <b-form-input id="koRounds" v-model.number="tournament.koRounds" min="0" type="number" />
       </div>
@@ -46,14 +46,14 @@ export default {
       lastDate: maxDate,
       today: nowDate,
       showForm: true,
-      tournTypes: [
+      tTypes: [
         { text: '- select tournament type -', value: null },
         { text: 'Knockouts Only', value: 'K' },
         { text: 'Preliminaries(Rounds) Only', value: 'P' },
         { text: 'Preliminaries and/then Knockouts', value: 'PK' }
       ],
       tournament: {
-        tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0, teams: []
+        tName: '', tPlace: '', tType: null, start: this.today, premRounds: 0, koRounds: 0, teams: []
       }
     }
   },
@@ -61,7 +61,7 @@ export default {
     resetForm: function () {
       this.showForm = false
       this.$nextTick(() => {
-        this.tournament = { tournName: '', tournPlace: '', tournType: null, startDate: this.today, premRounds: 0, koRounds: 0, teams: [] }
+        this.tournament = { tName: '', tPlace: '', tType: null, start: this.today, premRounds: 0, koRounds: 0, teams: [] }
       })
       this.showForm = true
     },

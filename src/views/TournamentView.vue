@@ -1,6 +1,12 @@
 <template>
-  <div id="tournament-view">
-    <h3> {{ tourn.tournName }} </h3>
+  <div id="tournament_view">
+    <h3>{{ tournament.tournName }}</h3>
+    <div class="table-row">
+      <div class="table-column name">{{ tournament.tournName }}</div>
+      <div class="table-column region">{{ tournament.tournPlace }}</div>
+      <div class="table-column type">{{ tournament.tournType }}</div>
+      <div class="table-column date">{{ tournament.startDate }}</div>
+    </div>
   </div>
 </template>
 
@@ -11,15 +17,13 @@ export default {
   name: 'TournamentView',
   data: function () {
     return {
-      koVisible: false,
-      premVisible: true,
-      koTeams: [],
-      emptyTournament: { currentRound: 1, tournType: 'PK', stage: 'P', teams: [] }
+      title: '',
+      koTeams: []
     }
   },
   computed: {
     ...mapGetters({
-      tourn: 'TOURNAMENT'
+      tournament: 'TOURNAMENT'
     })
   },
   methods: {
@@ -34,11 +38,23 @@ export default {
 </script>
 
 <style scoped>
-#tournament-view {
+#tournament_view {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   color: black;
+}
+.table-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+.table-column {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  justify-content: center;
+  margin-inline: .5rem;
 }
 </style>

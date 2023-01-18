@@ -3,56 +3,44 @@
     <b-row class="main">
       <h2>Open Tournaments</h2>
       <div class="container w-100">
-        <b-tabs active-nav-item-class="font-weight-bold text-uppercase text-danger" content-class="mt-3" align="center" justified>
-          <b-tab title="Start New Tournament">
-            <b-card-title>Enter the details of your tournament below to begin</b-card-title>
-            <b-card-text>
-              <tournament-form @clickSubmit="createTournament" />
-            </b-card-text>
-          </b-tab>
-          <b-tab title="Resume Tournament">
-            <b-card-title>Chooose from the currently running tournaments to continue</b-card-title>
-            <b-card-text>
-              <tourn-table title="Open Tournaments" />
-            </b-card-text>
-          </b-tab>
-        </b-tabs>
-        <div class="tourns">
-          <h3 style="text-align:center;">Tournaments</h3>
-          <div class="tournament-choice" v-for="(tourn, index) in tournaments" :key="index">
-            <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournName)">
-              <b-icon icon="list-ol"></b-icon> {{tourn.tournName}}
-            </b-button>
+        <div id="tournament-register">
+          <p>Create your new tournament here:</p>
+          <tournament-form @clickSubmit="createTournament" />
+        </div>
+        <div id="tournaments-view">
+          <div class="table-row" v-for="(tourn, index) in tournaments" :key="index">
+            <div class="table-column name">{{ tourn.tournName }}</div>
+            <div class="table-column region">{{ tourn.tournPlace }}</div>
+            <div class="table-column type">{{ tourn.tournType }}</div>
+            <div class="table-column date">{{ tourn.startDate }}</div>
+            <div class="table-column actions">
+              <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournName)"><b-icon icon="box-arrow-in-right"></b-icon> Open</b-button>
+            </div>
           </div>
         </div>
       </div>
     </b-row>
-    <b-row class="second">
+    <!--b-row class="second">
       <h2>Completed Tournaments</h2>
       <div class="container w-100">
         <div class="accordion" role="tablist">
           <tourn-summary v-for="(tourn, index) in completeTournaments" :tournament="tourn" :key="index" />
         </div>
       </div>
-    </b-row>
+    </b-row-->
   </b-container>
 </template>
 
 <script>
-import TournTable from '@/components/TournsTable.vue'
-import TournSummary from '@/components/TournSummary.vue'
+// import TournSummary from '@/components/TournSummary.vue'
 import TournamentForm from '@/components/TournamentForm.vue'
 import { mapGetters } from 'vuex'
 
 export default {
-  components: { TournTable, TournSummary, TournamentForm },
+  components: { TournamentForm },
   name: 'GameView',
   data: function () {
     return {
-      completeTournaments: [
-      ],
-      runningTournaments: [],
-      counter: 0
     }
   },
   computed: {
@@ -69,11 +57,19 @@ export default {
       // formData.append('tDate', tournament.startDate)
       // formData.append('tPrem', tournament.premRounds)
       // formData.append('tKO', tournament.koRounds)
-      this.$store.dispatch('CREATE_TOURNAMENT', tournament)
+      const t = {}
+      t.tournName = tournament.tName
+      t.tournPlace = tournament.tPlace
+      t.tournType = tournament.tType
+      t.koRounds = tournament.koRounds
+      t.premRounds = tournament.premRounds
+      t.startDate = tournament.start
+      t.teams = tournament.teams
+      this.$store.dispatch('CREATE_TOURNAMENT', t)
     },
     openTournament: async function (tourn) {
-      await this.$store.dispatch('SET_TOURNAMENT', this.tournaments.filter(tournament => tournament.tournName === tourn))
-      this.$router.push(`/tournament/${tourn.trim().split(' ').join('')}`)
+      const currentTournament = this.tournaments.filter(tournament => tournament.tournName === tourn)
+      await this.$store.dispatch('SET_TOURNAMENT', currentTournament[0]).then(() => this.$router.push(`/tournament/${tourn.trim().split(' ').join('')}`))
     }
   }
 }
@@ -86,6 +82,19 @@ export default {
   padding: 1em;
   .container {
     padding: 7px;
+  }
+}
+.table-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  .table-column {
+    display: flex;
+    width: max-content;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    margin-inline: .5rem;
   }
 }
 </style>

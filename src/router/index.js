@@ -4,6 +4,7 @@ import HomeView from '../views/HomeView.vue'
 
 Vue.use(VueRouter)
 
+const isAuthenticated = true
 const routes = [
   {
     path: '/home',
@@ -12,9 +13,9 @@ const routes = [
     alias: '/'
   },
   {
-    path: '/events',
-    name: 'events',
-    component: () => import('../views/EventView.vue')
+    path: '/register',
+    name: 'register',
+    component: () => import('../views/RegisterView.vue')
   },
   {
     path: '/account',
@@ -32,6 +33,14 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (!isAuthenticated && (to.name !== 'register')) {
+    next({ name: 'register' })
+  } else {
+    next()
+  }
 })
 
 export default router
