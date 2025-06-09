@@ -7,6 +7,14 @@
         <tournament-form @clickSubmit="createTournament" />
       </div>
       <div id="tournaments-view">
+        <h4>Ongoing Tournaments</h4>
+        <div class="table-row header">
+          <div class="table-column name">Tournament Name</div>
+          <div class="table-column region">Region</div>
+          <div class="table-column type">Type</div>
+          <div class="table-column date">Start Date</div>
+          <div class="table-column actions">Actions</div>
+        </div>
         <div class="table-row" v-for="(tourn, index) in tournaments" :key="index">
           <div class="table-column name">{{ tourn.tournName }}</div>
           <div class="table-column region">{{ tourn.tournPlace }}</div>
@@ -91,13 +99,33 @@ export default {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+  margin-bottom: .6rem;
+  &.header {
+    font-weight: bold;
+    background-color: hsla(0, 0%, 0%, 0.234);
+  }
 }
 .table-column {
-    display: flex;
-    width: max-content;
-    align-items: center;
-    justify-content: center;
-    flex-grow: 1;
-    margin-inline: .5rem;
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  justify-content: center;
+  flex-grow: 1;
+  margin-inline: .5rem;
+  text-wrap: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar {
+    display: none;
+  } */
+  &.name, &.region {
+    justify-content: flex-start;
   }
+}
 </style>

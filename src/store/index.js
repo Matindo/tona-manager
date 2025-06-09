@@ -72,6 +72,7 @@ export default new Vuex.Store({
     },
     CREATE_TOURNAMENT: function (context, payload) {
       context.commit('ADD_TOURN', payload)
+      context.commit('SAVE_DATA')
     },
     SET_TOURNAMENTS: function (context, payload) {
       context.commit('SET_TOURNS', payload)
@@ -84,6 +85,7 @@ export default new Vuex.Store({
     },
     END_TOURNAMENT: function (context) {
       context.commit('END_TOURN')
+      context.commit('SAVE_DATA')
     },
     SIGNOUT_USER: function (context) {
       context.commit('LOGOUT_USER')

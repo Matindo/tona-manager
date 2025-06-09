@@ -66,6 +66,7 @@ export default {
   color: white;
   transition: all .1s linear;
   width: 100dvw;
+  min-height: 100dvh;
 }
 
 .container > .row {
