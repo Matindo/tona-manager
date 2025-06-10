@@ -1,6 +1,15 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import VuexPersistence from 'vuex-persist'
 
+import { auth } from '@/store/auth.module'
+import { tona } from '@/store/data.module'
+import { user } from '@/store/user.module'
+
+const localDB = new VuexPersistence({
+  supportCircular: true,
+  storage: window.localStorage
+})
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -12,15 +21,6 @@ export default new Vuex.Store({
     teams: []
   },
   getters: {
-    TOURNAMENT: function (state) {
-      return state.tournament
-    },
-    TOURNAMENTS: function (state) {
-      return state.tournaments
-    },
-    USER: function (state) {
-      return state.user
-    },
     SEARCH_RESULTS: function (state) {
       return state.searchResults
     },
@@ -54,6 +54,15 @@ export default new Vuex.Store({
     SAVE_DATA: function (state) {
       localStorage.setItem('tournaments', JSON.stringify(state.tournaments))
       localStorage.setItem('teams', JSON.stringify(state.teams))
+    },
+    RESET_USER: function (state) {
+      state.user = null
+      state.loggedIn = false
+      const user = localStorage.getItem('user')
+      if (user.length > 0) {
+        state.loggedIn = true
+        state.user = JSON.parse(user)
+      }
     }
   },
   actions: {
@@ -92,8 +101,13 @@ export default new Vuex.Store({
     },
     TERMINATE: function (context) {
       context.commit('SAVE_DATA')
-    }
+    },
+    resetUser: async function ({ commit }) { await commit('RESET_USER') }
   },
   modules: {
-  }
+    auth,
+    tona,
+    user
+  },
+  plugins: [localDB.plugin]
 })

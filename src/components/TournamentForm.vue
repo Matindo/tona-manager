@@ -17,14 +17,14 @@
         <label for="startDate">Start Date:</label>
         <b-form-datepicker id="startDate" v-model="tournament.start" :min="firstDate" :max="lastDate" :date-format-options="{ year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' }" locale="en" required />
       </div>
-      <div class="form-input-group" v-show="tournament.tType !== 'K'">
+      <!-- <div class="form-input-group" v-show="tournament.tType !== 'K'">
         <label for="premRounds">Preliminary Rounds:</label>
         <b-form-input id="premRounds" v-model.number="tournament.premRounds" min="0" type="number" />
       </div>
       <div class="form-input-group" v-show="tournament.tType !== 'P'">
         <label for="koRounds" label-cols="12">Knock-Out Rounds:</label>
         <b-form-input id="koRounds" v-model.number="tournament.koRounds" min="0" type="number" />
-      </div>
+      </div> -->
     </div>
     <div class="form-buttons">
       <b-button type="submit" variant="outline-success" pill>Start Tournament</b-button>
@@ -53,7 +53,7 @@ export default {
         { text: 'Preliminaries and/then Knockouts', value: 'PK' }
       ],
       tournament: {
-        tName: '', tPlace: '', tType: null, start: this.today, premRounds: 0, koRounds: 0, teams: []
+        tName: '', tPlace: '', tType: null, start: this.today
       }
     }
   },
@@ -61,7 +61,7 @@ export default {
     resetForm: function () {
       this.showForm = false
       this.$nextTick(() => {
-        this.tournament = { tName: '', tPlace: '', tType: null, start: this.today, premRounds: 0, koRounds: 0, teams: [] }
+        this.tournament = { tName: '', tPlace: '', tType: null, start: this.today }
       })
       this.showForm = true
     },

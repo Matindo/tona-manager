@@ -56,22 +56,13 @@ export default {
   },
   methods: {
     createTournament: function (tournament) {
-      // const formData = new FormData()
-      // formData.append('tName', tournament.tournName)
-      // formData.append('tLocation', tournament.tournPlace)
-      // formData.append('tType', tournament.tournType)
-      // formData.append('tDate', tournament.startDate)
-      // formData.append('tPrem', tournament.premRounds)
-      // formData.append('tKO', tournament.koRounds)
-      const t = {}
-      t.tournName = tournament.tName
-      t.tournPlace = tournament.tPlace
-      t.tournType = tournament.tType
-      t.koRounds = tournament.koRounds
-      t.premRounds = tournament.premRounds
-      t.startDate = tournament.start
-      t.teams = tournament.teams
-      this.$store.dispatch('CREATE_TOURNAMENT', t)
+      const tourn = {}
+      tourn.tournName = tournament.tName
+      tourn.tournPlace = tournament.tPlace
+      tourn.tournType = tournament.tType
+      tourn.startDate = tournament.start
+      tourn.status = 'created'
+      this.$store.dispatch('CREATE_TOURNAMENT', tourn)
     },
     openTournament: async function (tourn) {
       const currentTournament = this.tournaments.filter(tournament => tournament.tournName === tourn)
