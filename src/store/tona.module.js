@@ -11,6 +11,7 @@ export const tona = {
       type: '',
       start: '',
       status: '',
+      teams: []
     }
   },
   getters: {

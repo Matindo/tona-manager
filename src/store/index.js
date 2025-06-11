@@ -5,6 +5,7 @@ import VuexPersistence from 'vuex-persist'
 import { auth } from '@/store/auth.module'
 import { tona } from '@/store/data.module'
 import { user } from '@/store/user.module'
+import { team } from '@/store/team.module'
 
 const localDB = new VuexPersistence({
   supportCircular: true,
@@ -107,7 +108,8 @@ export default new Vuex.Store({
   modules: {
     auth,
     tona,
-    user
+    user,
+    team
   },
   plugins: [localDB.plugin]
 })
