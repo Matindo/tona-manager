@@ -50,7 +50,11 @@ fastapi-backend
    ```
    fastapi dev main.py 
    ```
-
+   For deployment environment, run:
+   ```
+   fastapi run main.py 
+   ```
+   
 ## Usage Guidelines
 
 - **Authentication Endpoints**: Use the `/auth` endpoints for user login, registration, and logout.

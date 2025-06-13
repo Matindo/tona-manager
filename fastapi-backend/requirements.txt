@@ -1,2 +1,6 @@
 fastapi[standard]==0.113.0
 pydantic==2.8.0
+python-multipart==0.0.6
+email-validator==2.0.0
+pyjwt==2.6.0
+passlib==1.7.4
