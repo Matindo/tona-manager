@@ -7,40 +7,17 @@ axios.defaults.withCredentials = true
 
 
 class UserService {
-    async updateName (user) {
-        const formData = new FormData()
-        formData.append('id', user.id)
-        formData.append('firstName', user.fname)
-        formData.append('lastName', user.lname)
+    async getUser (userId) {
         const response = await axios({
-            method: 'POST',
-            url: API_URL + '/changeName',
-            data: formData,
-            headers: { 'Content-Type' : 'multipart/form-data' }
+            method: 'GET',
+            url: API_URL + `/${userId}`
         })
-        if (response.status === 200){
-            return { isError: response.data.error, message: response.data.message }
-        } else if (response.status === 401) {
-            localStorage.removeItem('user')
-            return false
-        }
-    }
-
-    async updateEmail (user) {
-        const formData = new FormData()
-        formData.append('id', user.id)
-        formData.append('email', user.email)
-        const response = await axios({
-            method: 'POST',
-            url: API_URL + '/changeEmail',
-            data: formData,
-            headers: { 'Content-Type' : 'multipart/form-data' }
-        })
-        if (response.status === 200){
-            return { isError: response.data.error, message: response.data.message }
-        } else if (response.status === 401) {
-            localStorage.removeItem('user')
-            return false
+        if (response.status !== 200) { return false } else {
+            if (response.data.error) {
+                return { isError: response.data.error, message: response.data.message }
+            } else {
+                return { isError: response.data.error, user: response.data.user }
+            }
         }
     }
 
@@ -50,7 +27,7 @@ class UserService {
         formData.append('oldPassword', user.oldPass)
         formData.append('newPassword', user.newPass)
         const response = await axios({
-            method: 'POST',
+            method: 'PUT',
             url: API_URL + '/changePassword',
             data: formData,
             headers: { 'Content-Type' : 'multipart/form-data' }
@@ -63,9 +40,13 @@ class UserService {
         }
     }
 
-    async updateUser (id) {
+    async updateUser (user) {
         const formData = new FormData()
-        formData.append('id', id)
+        formData.append('id', user.id)
+        formData.append('firstName', user.firstName)
+        formData.append('lastName', user.lastName)
+        formData.append('username', user.username)
+        formData.append('email', user.email)
         const response = await axios({
             method: 'POST',
             url: API_URL + '/updateUser',
@@ -90,7 +71,7 @@ class UserService {
         formData.append('id', user.id)
         const response = await axios({
             method: 'POST',
-            url: API_URL + '/upgradeUser',
+            url: API_URL + '/promote',
             data: formData,
             headers: { 'Content-Type' : 'multipart/form-data' }
         })
@@ -104,7 +85,7 @@ class UserService {
         formData.append('id', user.id)
         const response = await axios({
             method: 'POST',
-            url: API_URL + '/downgradeUser',
+            url: API_URL + '/demote',
             data: formData,
             headers: { 'Content-Type' : 'multipart/form-data' }
         })
