@@ -9,11 +9,29 @@ axios.defaults.withCredentials = true
 
 class TeamService {
   async getTeam (id) {
-    const formData = new FormData()
-    formData.append('id', id)
     const response = await axios({
-      method: 'POST',
-      url: API_URL + '/getTeam',
+      method: 'GET',
+      url: API_URL + `/${id}`
+    })
+    if (response.status != 200) { return false } else {
+      if(response.data.error) {
+        return { isError: response.data.error,  message: response.data.message }
+      } else {
+        return { isError: response.data.error, team: response.data.team }
+      }
+    }
+  }
+
+  async editTeam (team) {
+    const formData = new FormData()
+    formData.append('teamid', team.id)
+    formData.append('tournid', team.tournid)
+    formData.append('name', team.name)
+    formData.append('region', team.region)
+    formData.append('logo', team.logo)
+    const response = await axios({
+      method: 'PUT',
+      url: API_URL + '/updateTeam',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -35,7 +53,7 @@ class TeamService {
     formData.append('role', member.role)
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/addTeamMember',
+      url: API_URL + '/addMember',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -58,7 +76,7 @@ class TeamService {
     formData.append('role', member.role)
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/editTeamMember',
+      url: API_URL + '/editMember',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -75,8 +93,8 @@ class TeamService {
     formData.append('teamId', teamId)
     formData.append('memberId', memberId)
     const response = await axios({
-      method: 'POST',
-      url: API_URL + '/deleteTeamMember',
+      method: 'DELETE',
+      url: API_URL + '/deleteMember',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -93,6 +111,7 @@ class TeamService {
     const formData = new FormData()
     formData.append('teamId', teamId)
     formData.append('memberId', memberId)
+    formData.append('stage', score.stage)
     formData.append('round', score.round)
     formData.append('score', score.score)
     formData.append('timestamp', moment().format('YYYY-MM-DD HH:mm:ss'))
@@ -111,23 +130,23 @@ class TeamService {
     }
   }
 
-  async getTeamScores (id) {
-    const formData = new FormData()
-    formData.append('id', id)
-    const response = await axios({
-      method: 'POST',
-      url: API_URL + '/getTeamScores',
-      data: formData,
-      headers: { 'Content-Type' : 'multipart/form-data' }
-    })
-    if (response.status != 200) { return false } else {
-      if(response.data.error) {
-        return { isError: response.data.error,  message: response.data.message }
-      } else {
-        return { isError: response.data.error, teamScores: response.data.scores }
-      }
-    }
-  }
+  // async getTeamScores (id) {
+  //   const formData = new FormData()
+  //   formData.append('id', id)
+  //   const response = await axios({
+  //     method: 'POST',
+  //     url: API_URL + '/getTeamScores',
+  //     data: formData,
+  //     headers: { 'Content-Type' : 'multipart/form-data' }
+  //   })
+  //   if (response.status != 200) { return false } else {
+  //     if(response.data.error) {
+  //       return { isError: response.data.error,  message: response.data.message }
+  //     } else {
+  //       return { isError: response.data.error, teamScores: response.data.scores }
+  //     }
+  //   }
+  // }
 
   async getTeamMemberScores (teamId, memberId) {
     const formData = new FormData()
@@ -135,7 +154,7 @@ class TeamService {
     formData.append('memberId', memberId)
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/getTeamMemberScores',
+      url: API_URL + '/getMemberScores',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })

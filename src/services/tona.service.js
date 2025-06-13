@@ -23,11 +23,9 @@ class TonaService {
 
   async getTournament (id) {
     if (localStorage.getItem('tournament')) { localStorage.removeItem('tournament') }
-    const formData = new FormData()
-    formData.append('id', id)
     const response = await axios({
-      method: 'POST',
-      url: API_URL + '/getTournament',
+      method: 'GET',
+      url: API_URL + `/${id}`,
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -68,7 +66,7 @@ class TonaService {
     formData.append('startDate', tourn.startDate)
     formData.append('tournStatus', tourn.status)
     const response = await axios({
-      method: 'POST',
+      method: 'PUT',
       url: API_URL + '/editTournament',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
@@ -80,13 +78,9 @@ class TonaService {
 
   async getTournamentTeams (id) {
     if (localStorage.getItem('tournamentTeams')) { localStorage.removeItem('tournamentTeams') }
-    const formData = new FormData()
-    formData.append('id', id)
     const response = await axios({
-      method: 'POST',
-      url: API_URL + '/getTournamentTeams',
-      data: formData,
-      headers: { 'Content-Type' : 'multipart/form-data' }
+      method: 'GET',
+      url: API_URL + `/${id}/getTeams`
     })
     if (response.status != 200) { return false } else {
       if(response.data.error) {
@@ -102,10 +96,11 @@ class TonaService {
     const formData = new FormData()
     formData.append('tournID', team.tournID)
     formData.append('teamName', team.teamName)
-    formData.append('teamCaptain', team.teamCaptain)
+    formData.append('teamLogo', team.teamLogo)
+    formData.append('region', team.region)
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/addTournamentTeam',
+      url: API_URL + '/addTeam',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -120,7 +115,7 @@ class TonaService {
     formData.append('teams', JSON.stringify(teams.teams))
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/addTournamentTeams',
+      url: API_URL + '/addTeams',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -129,31 +124,30 @@ class TonaService {
     } else { return false }
   }
 
-  async startPreliminaryRound (id, round = 1) {
+  async removeTournamentTeam (team) {
+    const formData = new FormData()
+    formData.append('tournID', team.tournID)
+    formData.append('teamID', team.teamID)
+    const response = await axios({
+      method: 'DELETE',
+      url: API_URL + '/removeTeam',
+      data: formData,
+      headers: { 'Content-Type' : 'multipart/form-data' }
+    })
+    if (response.status === 200) {
+      return { isError: response.data.error,  message: response.data.message }
+    } else { return false }
+  }
+
+  async startRound (id, stage, round = 1) {
     if (round < 1) { round = 1 }
     const formData = new FormData()
     formData.append('id', id)
     formData.append('round', round)
-    formData.append('timestamp', moment().format('YYYY-MM-DD HH:mm:ss'))
+    formData.append('stage', stage)
     const response = await axios({
       method: 'POST',
-      url: API_URL + '/startPreliminaryRound',
-      data: formData,
-      headers: { 'Content-Type' : 'multipart/form-data' }
-    })
-    if (response.status === 200) {
-      return { isError: response.data.error,  message: response.data.message }
-    } else { return false }
-  }
-
-  async startKnockoutRound (id, round) {
-    const formData = new FormData()
-    formData.append('id', id)
-    formData.append('round', round)
-    formData.append('timestamp', moment().format('YYYY-MM-DD HH:mm:ss'))
-    const response = await axios({
-      method: 'POST',
-      url: API_URL + '/startKnockoutRound',
+      url: API_URL + '/startRound',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })
@@ -182,6 +176,20 @@ class TonaService {
     const response = await axios({
       method: 'POST',
       url: API_URL + '/endTournament',
+      data: formData,
+      headers: { 'Content-Type' : 'multipart/form-data' }
+    })
+    if (response.status === 200) {
+      return { isError: response.data.error,  message: response.data.message }
+    } else { return false }
+  }
+
+  async deleteTournament (id) {
+    const formData = new FormData()
+    formData.append('id', id)
+    const response = await axios({
+      method: 'DELETE',
+      url: API_URL + '/deleteTournament',
       data: formData,
       headers: { 'Content-Type' : 'multipart/form-data' }
     })

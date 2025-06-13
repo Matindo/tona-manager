@@ -10,7 +10,7 @@ class AuthService {
         const response = await axios.post(API_URL + '/authenticate')
         if (response.status === 401) {
             localStorage.removeItem('user')
-        } else if (response.status === 200 && response.data.error) {
+        } else if (response.status !== 200 && response.data.error) {
             localStorage.removeItem('user')
             return { isError: response.data.error, message: response.data.message }
         } else {
