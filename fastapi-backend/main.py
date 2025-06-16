@@ -10,4 +10,4 @@ app.include_router(user_endpoints.router, prefix="/user")
 
 @app.get("/", status_code=status.HTTP_200_OK)
 async def root():
-  return {"message": "Welcome to TonaManager backend systems!"}
+  return { "message": "Welcome to TonaManager backend systems!" }
