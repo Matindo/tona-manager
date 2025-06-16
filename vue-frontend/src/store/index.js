@@ -3,7 +3,7 @@ import Vuex from 'vuex'
 import VuexPersistence from 'vuex-persist'
 
 import { auth } from '@/store/auth.module'
-import { tona } from '@/store/data.module'
+import { tona } from '@/store/tona.module'
 import { user } from '@/store/user.module'
 import { team } from '@/store/team.module'
 
