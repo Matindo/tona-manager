@@ -4,3 +4,5 @@ python-multipart
 email-validator
 pyjwt
 passlib
+dotenv
+sqlmodel

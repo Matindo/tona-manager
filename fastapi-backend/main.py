@@ -1,7 +1,9 @@
 from fastapi import FastAPI, status
+from services.db_service import init_db
 from endpoints import auth_endpoints, team_endpoints, tona_endpoints, user_endpoints
 
 app = FastAPI()
+init_db()
 
 app.include_router(auth_endpoints.router, prefix="/auth")
 app.include_router(team_endpoints.router, prefix="/team")
