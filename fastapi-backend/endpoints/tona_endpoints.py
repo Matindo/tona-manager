@@ -13,7 +13,10 @@ async def get_all_tournaments():
     This endpoint returns a list of all tournaments in the system.
     """
     try:
-        return await tona_server.get_tournaments()
+        tournaments = await tona_server.get_tournaments()
+        if tournaments.is_empty():
+            raise HTTPException(status_code=404, detail="No tournaments found")
+        return tournaments
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
