@@ -1,29 +1,30 @@
 from fastapi import APIRouter, HTTPException
-from models.tournament import Tournament
+from models.tournament import TournamentCreate, TournamentUpdate, TournamentResponse
 from models.team import Team
+import services.tona_service as tona_server
 
 
 router = APIRouter()
 
-@router.get("/getTournaments", response_model=list[Tournament])
+@router.get("/getTournaments", response_model=list[TournamentResponse])
 async def get_all_tournaments():
     """
     Retrieve all tournaments.
     This endpoint returns a list of all tournaments in the system.
     """
     try:
-        return await get_all_tournaments()
+        return await tona_server.get_tournaments()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{tournament_id}")
+@router.get("/{tournament_id}", response_model=TournamentResponse)
 async def get_tournament(tournament_id: int):
     """
     Retrieve a tournament by ID.
     This endpoint returns the details of a tournament specified by its ID.
     """
     try:
-        tournament = await get_tournament(tournament_id)
+        tournament = await tona_server.get_tournament_by_id(tournament_id)
         if not tournament:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return tournament
@@ -37,18 +38,18 @@ async def create_tournament(tournament: dict):
     This endpoint allows creating a new tournament with the provided details.
     """
     try:
-        created_tournament = await create_tournament(tournament)
-        return {"message":"Tournament created successfully", "tournament":created_tournament}
+        created_tournament = await tona_server.create_tournament(tournament)
+        return created_tournament
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.put("/editTournament")
-async def update_tournament(tournament: Tournament):
+@router.put("/editTournament", response_model=TournamentResponse)
+async def update_tournament(tournament: TournamentUpdate):
     """ Update an existing tournament.
     This endpoint allows updating the details of an existing tournament.
     """
     try:
-        updated_tournament = await update_tournament(tournament)
+        updated_tournament = await tona_server.update_tournament(tournament)
         if not updated_tournament:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return updated_tournament
@@ -150,14 +151,14 @@ async def end_tournament(tournament_id: int):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.delete("/deleteTournament")
+@router.delete("/deleteTournament", status_code=204)
 async def delete_tournament(tournament_id: int):
     """
     Delete a tournament.
     This endpoint allows deleting a tournament specified by its ID.
     """
     try:
-        result = await delete_tournament(tournament_id)
+        result = await tona_server.delete_tournament(tournament_id)
         if not result:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return {"message": "Tournament deleted successfully"}
