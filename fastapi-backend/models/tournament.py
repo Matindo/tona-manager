@@ -1,39 +1,42 @@
 from sqlmodel import Field, SQLModel, Column
-from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy import ARRAY, Integer
 from typing import List
 from datetime import datetime
 
-class Tournament(SQLModel):
+class TournamentBase(SQLModel):
     name: str = Field(..., max_length=100)
-    region: str | None = Field(default=None, max_length=150)
-    type: str = Field(default="P") # P for preliminaries only, K for knock-outs only, PK for both
-    start_date: datetime = Field(default_factory=datetime.now())
-    status: str = "upcoming" # "upcoming", "ongoing", "completed"
+    region: str | None = Field(default=None, max_length=150, description="Area the tournament is being held")
+    type: str = Field(default="P", description="P for preliminaries only, K for knock-outs only, PK for both")
+    status: str | None = Field(default="upcoming", description="'upcoming', 'ongoing', 'completed'")
      
-class TournamentCreate(Tournament):
+class TournamentCreate(TournamentBase):
     pass
 
 class TournamentUpdate(SQLModel):
+    tournament_id: int
     name: str | None = None
     region: str | None = None
     type: str | None = None
-    start_date: datetime | None = None
+    start_date: str | None = None
     stage: str | None = None
-    round: int | None = None
-    teams: List[int] = Field(default=[], sa_column=Column(ARRAY(Integer)))
+    round: str | None = None
+    teams: List[int] | None = Field(default=[], sa_column=Column(ARRAY(Integer)))
     status: str | None = None
     
-class TournamentInDB(Tournament, table=True):
+class Tournament(TournamentBase, table=True):
     tournament_id: int | None = Field(default=None, primary_key=True)
-    stage: str | None = Field(default="preliminaries")
-    round: str | None = Field(default="P1")
-    end_date: datetime | None = None
-    teams: List[int] = Field(default_factory=list, sa_column=Column(ARRAY(Integer)))
+    stage: str | None = Field(..., description="Preliminaries, Knockouts")
+    round: str | None = Field(..., description="The round of a particular stage eg P3(round 3 of Prelims), Semi-Finals")
+    start_date: str | None = Field(default=datetime.now().isoformat(" ", "seconds"), description="When the tournament is created")
+    end_date: str | None = Field(..., description="Closing day of tournament")
+    teams: List[int] = Field(default_factory=list, sa_column=Column(ARRAY(Integer)), description="List of teamIDs of teams participating")
     
     
-class TournamentResponse(Tournament):
+class TournamentResponse(TournamentBase):
     tournament_id: int
-    stage: str  
-    round: str
-    end_date: datetime | None = None
+    stage: str | None
+    round: str | None
+    start_date: str
+    status: str
+    end_date: str | None = None
     teams: List[int]
