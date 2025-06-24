@@ -77,13 +77,13 @@ def get_teams_in_tournament(tournament_id: Annotated[int, Path(description="Tour
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.post("/addTeam", status_code=status.HTTP_201_CREATED)
-def add_team_to_tournament(team: TeamCreate, session : Session = Depends(get_session)):
+def add_team_to_tournament(tournament_id: int, team: TeamCreate, session : Session = Depends(get_session)):
     """
     Add a team to a tournament.
     This endpoint allows adding a specified team to the tournament.
     """
     try:
-        result = tona_server.add_team(team, session)
+        result = tona_server.add_team(tournament_id, team, session)
         if not result:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return { "message": "Team added to tournament successfully" }
