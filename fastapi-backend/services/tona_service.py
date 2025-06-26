@@ -33,11 +33,10 @@ def update_tournament(tournament: TournamentUpdate, session: Session) -> Tournam
   session.refresh(existing_tournament)
   return TournamentResponse(**existing_tournament.model_dump())
   
-def add_team(team: TeamCreate, session: Session) -> TournamentResponse | None:
+def add_team(tourn_id: int, team: TeamCreate, session: Session) -> TournamentResponse | None:
   created_team = team_server.create_team(team, session)
   if not created_team:
     return None
-  tourn_id = created_team.tournament_id
   teamlist = get_tournament_by_id(tourn_id, session).model_dump().get("teams")
   teamlist.append(created_team.team_id)
   tournament = TournamentUpdate(tournament_id=created_team.tournament_id, teams=teamlist)
