@@ -58,7 +58,7 @@ def get_teams_in_tournament(tournament_id: int, session: Session) -> List[TeamRe
   teamlist = get_tournament_by_id(tournament_id, session).model_dump().get("teams")
   if not teamlist:
     return None
-  teams = List[TeamResponse]
+  teams = []
   for team_id in teamlist:
     team = team_server.get_team(team_id, session)
     teams.append(team)

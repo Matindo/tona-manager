@@ -6,7 +6,7 @@ class TeamMemberBase(SQLModel):
   birthdate: str | None = Field(default=None, description="Date of birth of the team member in ISO format")
   role: str = Field(default="member", description="Role of the team member in the team, e.g., 'member', 'captain', 'coach'")
   rep: str | None = Field(default=None, description="Region, class or category the member represents")
-  teamId: int = Field(..., foreign_key="team.team_id", description="ID of the team this member belongs to")
+  teamId: int | None = Field(default=1, foreign_key="team.team_id", description="ID of the team this member belongs to")
     
 class TeamMemberCreate(TeamMemberBase):
   pass

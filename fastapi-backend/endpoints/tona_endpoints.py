@@ -61,13 +61,13 @@ def update_tournament(tournament: TournamentUpdate, session: Session = Depends(g
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/{tournament_id}/getTeams", status_code=status.HTTP_200_OK)
-def get_teams_in_tournament(tournament_id: Annotated[int, Path(description="Tournament ID whose teams you want")]):
+def get_teams_in_tournament(tournament_id: Annotated[int, Path(description="Tournament ID whose teams you want")], session: Session = Depends(get_session)):
     """
     Retrieve teams in a tournament.
     This endpoint returns a list of teams participating in the specified tournament.
     """
     try:
-        teams = tona_server.get_teams_in_tournament(tournament_id)
+        teams = tona_server.get_teams_in_tournament(tournament_id, session)
         if not teams:
             raise HTTPException(status_code=404, detail="Tournament not found")
         if len(teams) == 0:

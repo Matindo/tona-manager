@@ -1,7 +1,7 @@
 from sqlmodel import SQLModel, Field
 from sqlalchemy import ARRAY, Integer, Column
 from typing import List
-from models.team_member import TeamMemberResponse
+from models.team_member import TeamMemberResponse, TeamMemberCreate
     
 class TeamBase(SQLModel):
     name: str = Field(..., max_length=100, description="Name of the team")
@@ -9,7 +9,7 @@ class TeamBase(SQLModel):
     region: str | None = Field(default=None, description="Area, region or division the team comes from")
     
 class TeamCreate(TeamBase):
-    members: List[int] | None
+    members: List[TeamMemberCreate] | None = None
     pass
     
 class TeamUpdate(SQLModel):

@@ -1,72 +1,96 @@
-from models.team import Team, TeamCreate, TeamResponse
-from models.team_member import TeamMemberResponse
+from models.team import Team, TeamCreate, TeamResponse, TeamUpdate
+from models.team_member import TeamMemberResponse, TeamMemberCreate
 from typing import List
 from sqlmodel import select, Session
 import services.member_service as member_server 
 
 def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
-  members = List[int]
-  if len(team_create.members) > 0:
-    for member in team_create.members:
-      member_to_db = 
-  team = Team(**team_create.model_dump())
-  if 
+  members_list = []
+  print(f"TeamCreate: {team_create}")
+  team = team_create.model_dump()
+  team["members"] = members_list
+  team = Team(**team)
+  print(f"Team: {team}")
   session.add(team)
   session.commit()
   session.refresh(team)
-  return TeamResponse(**team.model_dump())
+  print(f"Team after commit: {team}")
+  if team_create.members and len(team_create.members) > 0:
+    for member in team_create.members:
+      print(f"Creating team member: {member}")
+      member_to_db = TeamMemberCreate(**member.model_dump())
+      member_to_db.teamId = team.team_id
+      print(f"TeamMemberCreate: {member_to_db}")
+      created_member = member_server.create_team_member(member_to_db, session)
+      if created_member:
+        print(f"Created team member: {created_member}")
+        members_list.append(created_member.member_id)
+    team_update = TeamUpdate(team_id=team.team_id, members=members_list)
+    print(f"TeamUpdate: {team_update}")
+    return update_team(team_update, session)
+  team_res = team.model_dump()
+  team_res["members"] = convert_ids_to_members(team.members, session)
+  return TeamResponse(**team_res)
 
 def get_team(team_id: int, session: Session) -> TeamResponse | None:
-  statement = select(Team).where(Team.team_id == team_id)
-  result = session.exec(statement).first()
+  result = get_db_team(team_id, session)
+  print(f"Get team result: {result}")
   if not result:
     return None
   team_members = []
-  if result.members:
-    for member_id in result.members:
-      member = member_server.get_team_member(member_id, session)
-      if member:
-        team_members.append(TeamMemberResponse.model_validate(member))
-  return TeamResponse(**result.model_dump(), members=team_members)
+  if len(result.members) > 0:
+    team_members = convert_ids_to_members(result.members, session)
+  team = result.model_dump()
+  team["members"] = team_members
+  return TeamResponse(**team)
 
-def update_team(team: Team, session: Session) -> TeamResponse | None:
-  existing_team = get_team(team.team_id, session)
+def update_team(team: TeamUpdate, session: Session) -> TeamResponse | None:
+  existing_team = get_db_team(team.team_id, session)
   if not existing_team:
     return None
   update_data = team.model_dump(exclude_unset=True)
   for key, value in update_data.items():
     setattr(existing_team, key, value)
+  print(f"Updating team: {existing_team}")
   session.add(existing_team)
   session.commit()
   session.refresh(existing_team)
-  return TeamResponse(**existing_team.model_dump())
+  result = get_team(existing_team.team_id, session)
+  print(f"Updated team result: {result}")
+  return result
 
 def add_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
   team = get_team(team_id, session)
   if not team:
     return None
-  if member_id not in team.members:
-    team.members.append(member_id)
-    session.add(team)
-    session.commit()
-    session.refresh(team)
-  return TeamResponse(**team.model_dump())
+  member_list = convert_members_to_ids(team.members)
+  if member_id in member_list:
+    raise ValueError(f"Member {member_id} already exists in team {team_id}")
+  member_list.append(member_id)
+  team_update = TeamUpdate(team_id=team.team_id, members=member_list)
+  return update_team(team_update, session)
 
 def remove_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
   team = get_team(team_id, session)
   if not team:
     return None
-  if member_id in team.members:
-    team.members.remove(member_id)
-    session.add(team)
-    session.commit()
-    session.refresh(team)
-  return TeamResponse(**team.model_dump())
+  member_list = convert_members_to_ids(team.members)
+  if member_id not in member_list:
+    return None
+  member_list.remove(member_id)
+  team_update = TeamUpdate(team_id=team.team_id, members=member_list)
+  return update_team(team_update, session)
 
 def get_all_teams(session: Session) -> List[TeamResponse]:
   statement = select(Team)
   results = session.exec(statement).all()
-  return results
+  team_list = []
+  for team in results:
+    team_members = convert_ids_to_members(team.members, session)
+    team_data = team.model_dump()
+    team_data["members"] = team_members
+    team_list.append(TeamResponse(**team_data))
+  return team_list
 
 def delete_team(team_id: int, session: Session) -> bool:
   team = get_team(team_id, session)
@@ -75,3 +99,21 @@ def delete_team(team_id: int, session: Session) -> bool:
   session.delete(team)
   session.commit()
   return True
+
+# --------------------------------------------------------------------------------  #
+### Helper functions ###
+# --------------------------------------------------------------------------------  #
+def get_db_team(team_id: int, session: Session) -> Team | None:
+  statement = select(Team).where(Team.team_id == team_id)
+  return session.exec(statement).first()
+
+def convert_ids_to_members(member_ids: List[int], session: Session) -> List[TeamMemberResponse]:
+  members = []
+  for member_id in member_ids:
+    member = member_server.get_team_member(member_id, session)
+    if member:
+      members.append(member)
+  return members
+
+def convert_members_to_ids(members: List[TeamMemberResponse]) -> List[int]:
+  return [member.member_id for member in members] if members else []
