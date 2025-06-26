@@ -39,7 +39,7 @@ def add_team(tourn_id: int, team: TeamCreate, session: Session) -> TournamentRes
     return None
   teamlist = get_tournament_by_id(tourn_id, session).model_dump().get("teams")
   teamlist.append(created_team.team_id)
-  tournament = TournamentUpdate(tournament_id=created_team.tournament_id, teams=teamlist)
+  tournament = TournamentUpdate(tournament_id=tourn_id, teams=teamlist)
   return update_tournament(tournament, session)
 
 def add_multiple_teams(tourn_id: int, teams: List[TeamCreate], session: Session) -> TournamentResponse | None:
