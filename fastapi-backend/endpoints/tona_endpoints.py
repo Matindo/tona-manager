@@ -91,13 +91,13 @@ def add_team_to_tournament(tournament_id: int, team: TeamCreate, session : Sessi
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.post("/addTeams")
-def add_teams_to_tournament(tourn_id: int, teams: list[TeamCreate], session : Session = Depends(get_session)):
+def add_teams_to_tournament(tournament_id: int, teams: list[TeamCreate], session : Session = Depends(get_session)):
     """
     Add multiple teams to a tournament.
     This endpoint allows adding multiple teams to the tournament.
     """
     try:
-        result = tona_server.add_multiple_teams(tourn_id, teams, session)
+        result = tona_server.add_multiple_teams(tournament_id, teams, session)
         if not result:
             raise HTTPException(status_code=404, detail="Tournament or teams not found")
         return {"message": "Teams added to tournament successfully"}
@@ -127,7 +127,7 @@ def start_tournament_round(tournament_id: int, stage: str, round: str, session: 
     try:
         result = tona_server.start_round(tournament_id, stage, round, session)
         if not result:
-            raise HTTPException(status_code=404, detail="Tournament  not found")
+            raise HTTPException(status_code=404, detail="Tournament not found or round already started.")
         return {"message": f"{round} of {stage} started successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

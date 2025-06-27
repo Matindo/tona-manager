@@ -1,3 +1,4 @@
+from datetime import datetime
 from models.tournament import Tournament, TournamentCreate, TournamentUpdate, TournamentResponse
 from models.team import Team, TeamCreate, TeamResponse
 import services.team_service as team_server
@@ -10,6 +11,10 @@ def get_tournaments(session: Session) -> List[TournamentResponse]:
   return results
 
 def create_tournament(tournament_create: TournamentCreate, session: Session) -> TournamentResponse:
+  statement = select(Tournament).where(Tournament.name == tournament_create.name)
+  existing_tournament = session.exec(statement).first()
+  if existing_tournament:
+    raise ValueError(f"Tournament with name '{tournament_create.name}' already exists.")
   tournament = Tournament(**tournament_create.model_dump())
   session.add(tournament)
   session.commit()
@@ -43,14 +48,15 @@ def add_team(tourn_id: int, team: TeamCreate, session: Session) -> TournamentRes
   return update_tournament(tournament, session)
 
 def add_multiple_teams(tourn_id: int, teams: List[TeamCreate], session: Session) -> TournamentResponse | None:
-  teamlist_array = list[int]
+  teamlist_array = []
   for team in teams:
     created_team = team_server.create_team(team, session)
     if not created_team:
-      return None
+      continue
     teamlist_array.append(created_team.team_id)
   teamlist = get_tournament_by_id(tourn_id, session).model_dump().get("teams")
-  teamlist.append(teamlist_array)
+  for team_id in teamlist_array:
+    teamlist.append(team_id)
   tournament = TournamentUpdate(tournament_id=tourn_id, teams=teamlist)
   return update_tournament(tournament, session)
 
@@ -76,15 +82,19 @@ def remove_team(team_id: int, tourn_id: int, session: Session) -> TournamentResp
   return update_tournament(tourn_update, session)
 
 def start_round(tourn_id: int, stage: str, round: str, session: Session) -> TournamentResponse | None:
-  tourn_update = TournamentUpdate(tournament_id=tourn_id, stage=stage, round=round)
+  tourn_update = TournamentUpdate(tournament_id=tourn_id, stage=stage, round=round, status="ongoing")
+  existing_tournament = get_tournament_by_id(tourn_id, session)
+  if not existing_tournament:
+    return None
+  if existing_tournament.round == round and existing_tournament.stage == stage:
+    return None
   return update_tournament(tourn_update, session)
 
 def end_tournament(tourn_id: int, session: Session) -> TournamentResponse | None:
-  tourn_update = TournamentUpdate(tournament_id=tourn_id, status="completed")
+  end_date = datetime.now().isoformat(" ", "seconds")
+  tourn_update = TournamentUpdate(tournament_id=tourn_id, status="completed", end_date=end_date)
   updated_tournament = update_tournament(tourn_update, session)
-  if not updated_tournament:
-    return None
-  return updated_tournament
+  return updated_tournament if updated_tournament else None
 
 def delete_tournament(tournament_id: int, session: Session) -> bool:
   tournament = get_tournament_by_id(tournament_id, session)

@@ -18,9 +18,10 @@ class TournamentUpdate(SQLModel):
     region: str | None = None
     type: str | None = None
     start_date: str | None = None
+    end_date: str | None = None
     stage: str | None = None
     round: str | None = None
-    teams: List[int] | None = Field(default=[], sa_column=Column(ARRAY(Integer)))
+    teams: List[int] | None = []
     status: str | None = None
     
 class Tournament(TournamentBase, table=True):

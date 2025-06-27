@@ -5,8 +5,11 @@ from sqlmodel import select, Session
 import services.member_service as member_server 
 
 def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
+  statement = select(Team).where(Team.name == team_create.name)
+  existing_tournament = session.exec(statement).first()
+  if existing_tournament:
+    raise ValueError(f"Team with name '{team_create.name}' already exists.")
   members_list = []
-  print(f"TeamCreate: {team_create}")
   team = team_create.model_dump()
   team["members"] = members_list
   team = Team(**team)
@@ -14,19 +17,14 @@ def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
   session.add(team)
   session.commit()
   session.refresh(team)
-  print(f"Team after commit: {team}")
   if team_create.members and len(team_create.members) > 0:
     for member in team_create.members:
-      print(f"Creating team member: {member}")
       member_to_db = TeamMemberCreate(**member.model_dump())
       member_to_db.teamId = team.team_id
-      print(f"TeamMemberCreate: {member_to_db}")
       created_member = member_server.create_team_member(member_to_db, session)
       if created_member:
-        print(f"Created team member: {created_member}")
         members_list.append(created_member.member_id)
     team_update = TeamUpdate(team_id=team.team_id, members=members_list)
-    print(f"TeamUpdate: {team_update}")
     return update_team(team_update, session)
   team_res = team.model_dump()
   team_res["members"] = convert_ids_to_members(team.members, session)
@@ -34,7 +32,6 @@ def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
 
 def get_team(team_id: int, session: Session) -> TeamResponse | None:
   result = get_db_team(team_id, session)
-  print(f"Get team result: {result}")
   if not result:
     return None
   team_members = []
@@ -51,12 +48,10 @@ def update_team(team: TeamUpdate, session: Session) -> TeamResponse | None:
   update_data = team.model_dump(exclude_unset=True)
   for key, value in update_data.items():
     setattr(existing_team, key, value)
-  print(f"Updating team: {existing_team}")
   session.add(existing_team)
   session.commit()
   session.refresh(existing_team)
   result = get_team(existing_team.team_id, session)
-  print(f"Updated team result: {result}")
   return result
 
 def add_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
