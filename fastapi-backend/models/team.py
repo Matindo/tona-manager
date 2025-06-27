@@ -1,58 +1,29 @@
-from pydantic import BaseModel
+from sqlmodel import SQLModel, Field
+from sqlalchemy import ARRAY, Integer, Column
 from typing import List
-
-class Points(BaseModel):
-    tournamentId: int
-    memberId: int
-    stage: str
-    round: int
-    points: int
+from models.team_member import TeamMemberResponse, TeamMemberCreate
     
-class TeamMember(BaseModel):
-    name: str
-    gender: str
-    role: str
-    rep: str
-    teamId: int
+class TeamBase(SQLModel):
+    name: str = Field(..., max_length=100, description="Name of the team")
+    logo: str | None = Field(default=None, description="URL or path to the team's logo")
+    region: str | None = Field(default=None, description="Area, region or division the team comes from")
     
-class TeamMemberCreate(TeamMember):
-    pass
-
-class TeamMemberUpdate(BaseModel):
-    name: str | None = None
-    gender: str | None = None
-    role: str | None = None
-    rep: str | None = None
-    teamId: int | None = None
-    
-class TeamMemberInDB(TeamMember):
-    member_id: int
-    status: str = "active"  # e.g., "active", "inactive"
-    
-class TeamMemberResponse(TeamMember):
-    member_id: int
-    status: str = "active"  # e.g., "active", "inactive"
-    points: List[Points] = []  # List of points in different tournaments
-    
-class Team(BaseModel):
-    name: str
-    logo: str | None = None
-    region: str | None = None
-    members: List[TeamMember] = []
-    
-class TeamCreate(Team):
+class TeamCreate(TeamBase):
+    members: List[TeamMemberCreate] | None = None
     pass
     
-class TeamUpdate(BaseModel):
+class TeamUpdate(SQLModel):
+    team_id: int
     name: str | None = None
     logo: str | None = None
     region: str | None = None
-    members: List[TeamMember] | None = None
+    members: List[int] | None = None
     
-class TeamInDB(Team):
-    team_id: int
-    members: List[int] = []
+class Team(TeamBase, table=True):
+    team_id: int = Field(default=None, primary_key=True)
+    members: List[int] | None = Field(default_factory=list, sa_column=Column(ARRAY(Integer)))
     
-class TeamResponse(Team):
+class TeamResponse(TeamBase):
     team_id: int
-    members: List[TeamMember] = []
+    members: List[TeamMemberResponse] | None = None
+    

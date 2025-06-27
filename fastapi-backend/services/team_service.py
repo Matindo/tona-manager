@@ -1,0 +1,114 @@
+from models.team import Team, TeamCreate, TeamResponse, TeamUpdate
+from models.team_member import TeamMemberResponse, TeamMemberCreate
+from typing import List
+from sqlmodel import select, Session
+import services.member_service as member_server 
+
+def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
+  statement = select(Team).where(Team.name == team_create.name)
+  existing_tournament = session.exec(statement).first()
+  if existing_tournament:
+    raise ValueError(f"Team with name '{team_create.name}' already exists.")
+  members_list = []
+  team = team_create.model_dump()
+  team["members"] = members_list
+  team = Team(**team)
+  print(f"Team: {team}")
+  session.add(team)
+  session.commit()
+  session.refresh(team)
+  if team_create.members and len(team_create.members) > 0:
+    for member in team_create.members:
+      member_to_db = TeamMemberCreate(**member.model_dump())
+      member_to_db.teamId = team.team_id
+      created_member = member_server.create_team_member(member_to_db, session)
+      if created_member:
+        members_list.append(created_member.member_id)
+    team_update = TeamUpdate(team_id=team.team_id, members=members_list)
+    return update_team(team_update, session)
+  team_res = team.model_dump()
+  team_res["members"] = convert_ids_to_members(team.members, session)
+  return TeamResponse(**team_res)
+
+def get_team(team_id: int, session: Session) -> TeamResponse | None:
+  result = get_db_team(team_id, session)
+  if not result:
+    return None
+  team_members = []
+  if len(result.members) > 0:
+    team_members = convert_ids_to_members(result.members, session)
+  team = result.model_dump()
+  team["members"] = team_members
+  return TeamResponse(**team)
+
+def update_team(team: TeamUpdate, session: Session) -> TeamResponse | None:
+  existing_team = get_db_team(team.team_id, session)
+  if not existing_team:
+    return None
+  update_data = team.model_dump(exclude_unset=True)
+  for key, value in update_data.items():
+    setattr(existing_team, key, value)
+  session.add(existing_team)
+  session.commit()
+  session.refresh(existing_team)
+  result = get_team(existing_team.team_id, session)
+  return result
+
+def add_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
+  team = get_team(team_id, session)
+  if not team:
+    return None
+  member_list = convert_members_to_ids(team.members)
+  if member_id in member_list:
+    raise ValueError(f"Member {member_id} already exists in team {team_id}")
+  member_list.append(member_id)
+  team_update = TeamUpdate(team_id=team.team_id, members=member_list)
+  return update_team(team_update, session)
+
+def remove_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
+  team = get_team(team_id, session)
+  if not team:
+    return None
+  member_list = convert_members_to_ids(team.members)
+  if member_id not in member_list:
+    return None
+  member_list.remove(member_id)
+  team_update = TeamUpdate(team_id=team.team_id, members=member_list)
+  return update_team(team_update, session)
+
+def get_all_teams(session: Session) -> List[TeamResponse]:
+  statement = select(Team)
+  results = session.exec(statement).all()
+  team_list = []
+  for team in results:
+    team_members = convert_ids_to_members(team.members, session)
+    team_data = team.model_dump()
+    team_data["members"] = team_members
+    team_list.append(TeamResponse(**team_data))
+  return team_list
+
+def delete_team(team_id: int, session: Session) -> bool:
+  team = get_team(team_id, session)
+  if not team:
+    return False
+  session.delete(team)
+  session.commit()
+  return True
+
+# --------------------------------------------------------------------------------  #
+### Helper functions ###
+# --------------------------------------------------------------------------------  #
+def get_db_team(team_id: int, session: Session) -> Team | None:
+  statement = select(Team).where(Team.team_id == team_id)
+  return session.exec(statement).first()
+
+def convert_ids_to_members(member_ids: List[int], session: Session) -> List[TeamMemberResponse]:
+  members = []
+  for member_id in member_ids:
+    member = member_server.get_team_member(member_id, session)
+    if member:
+      members.append(member)
+  return members
+
+def convert_members_to_ids(members: List[TeamMemberResponse]) -> List[int]:
+  return [member.member_id for member in members] if members else []
