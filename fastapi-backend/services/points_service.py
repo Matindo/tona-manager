@@ -3,10 +3,16 @@ from typing import List
 from sqlmodel import select, Session
 import services.member_service as member_server 
 import services.tona_service as tona_server
+from datetime import datetime
 
 
 def add_points(points: PointsCreate, session: Session) -> PointsResponse:
   points_data = Points(**points.model_dump())
+  if tona_server.get_tournament_by_id(points.tournament_id, session) is None:
+    raise ValueError(f"Tournament with ID {points.tournament_id} does not exist")
+  if member_server.get_team_member(points.member_id, session) is None:
+    raise ValueError(f"Member with ID {points.member_id} does not exist")
+  points_data.created_at = datetime.now().isoformat(" ", "seconds")
   session.add(points_data)
   session.commit()
   session.refresh(points_data)
@@ -19,6 +25,7 @@ def update_points(points: PointsUpdate, session: Session)-> PointsResponse:
   update_data = points.model_dump(exclude_unset=True)
   for key, value in update_data.items():
     setattr(existing_points, key, value)
+  setattr(existing_points, "updated_at", datetime.now().isoformat(" ", "seconds"))
   session.add(existing_points)
   session.commit()
   session.refresh(existing_points)

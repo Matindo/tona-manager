@@ -9,8 +9,8 @@ import services.points_service as points_server
 
 def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
   statement = select(Team).where(Team.name == team_create.name)
-  existing_tournament = session.exec(statement).first()
-  if existing_tournament:
+  existing_team = session.exec(statement).first()
+  if existing_team:
     raise ValueError(f"Team with name '{team_create.name}' already exists.")
   members_list = []
   team = team_create.model_dump()
@@ -57,14 +57,15 @@ def update_team(team: TeamUpdate, session: Session) -> TeamResponse | None:
   result = get_team(existing_team.team_id, session)
   return result
 
-def add_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
-  team = get_team(team_id, session)
+def add_team_member(team_id: int, member: TeamMemberCreate, session: Session) -> TeamResponse | None:
+  team = get_db_team(team_id, session)
   if not team:
     return None
-  member_list = convert_members_to_ids(team.members)
-  if member_id in member_list:
-    raise ValueError(f"Member {member_id} already exists in team {team_id}")
-  member_list.append(member_id)
+  member_list = team.members
+  created_member = member_server.create_team_member(member, session)
+  if not created_member:
+    raise ValueError("Failed to create team member")
+  member_list.append(created_member.member_id)
   team_update = TeamUpdate(team_id=team.team_id, members=member_list)
   return update_team(team_update, session)
 
@@ -75,7 +76,8 @@ def update_team_member(team_id: int, member: TeamMemberUpdate, session: Session)
   member_exist = member_server.get_team_member(member.member_id, session)
   if not member_exist:
     raise ValueError(f"Member with ID {member.member_id} does not exist")
-  if member.teamId != team_id:
+  if member_exist.teamId != team_id:
+    print(f"Member's teamID: {member_exist.teamId}, Team ID: {team_id}")
     raise ValueError(f"Member {member.member_id} does not belong to team {team_id}")
   updated_member = member_server.update_team_member(member, session)
   if not updated_member:

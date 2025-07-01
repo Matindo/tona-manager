@@ -37,7 +37,7 @@ async def add_member(team_id: int, member: TeamMemberCreate, session: Session = 
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
-@router.post("/editMember", status_code=status.HTTP_202_ACCEPTED)
+@router.put("/editMember", status_code=status.HTTP_202_ACCEPTED)
 async def edit_member(team_id: int, member: TeamMemberUpdate, session: Session = Depends(get_session)):
     """
     Edit a member's details in a team.

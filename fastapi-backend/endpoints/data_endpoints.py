@@ -97,7 +97,7 @@ def edit_member_points(points: PointsUpdate, session: Session = Depends(get_sess
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
     
-@router.post("/deleteMemberScore", status_code=status.HTTP_204_NO_CONTENT)
+@router.post("/deleteMemberScore", status_code=status.HTTP_202_ACCEPTED)
 def delete_member_points(points_id: int, session: Session = Depends(get_session)):
   """
   Delete existing member points.
