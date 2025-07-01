@@ -106,7 +106,7 @@ def get_all_teams(session: Session) -> List[TeamResponse]:
 
 def get_team_points(tourn_id: int, team_id: int, session: Session) -> List[PointsResponse]:
   points = []
-  if tona_server.get_tournament(tourn_id, session) is None:
+  if tona_server.get_tournament_by_id(tourn_id, session) is None:
     raise ValueError(f"Tournament with ID {tourn_id} does not exist")
   team = get_db_team(team_id, session)
   if not team:

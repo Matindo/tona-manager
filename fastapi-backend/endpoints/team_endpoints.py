@@ -23,20 +23,6 @@ async def update_team(team: TeamUpdate, session: Session = Depends(get_session))
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/{team_id}", status_code=status.HTTP_200_OK, response_model=TeamResponse)
-async def get_team(team_id: Annotated[int, Path(description="ID of the team to fetch")], session: Session = Depends(get_session)):
-    """
-    Retrieve a team by ID.
-    This endpoint returns the details of a team specified by its ID.
-    """
-    try:
-        team = team_server.get_team(team_id, session)
-        if not team:
-            raise HTTPException(status_code=404, detail="Team not found")
-        return {"team": team}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    
 @router.post("/addMember", status_code=status.HTTP_201_CREATED)
 async def add_member(team_id: int, member: TeamMemberCreate, session: Session = Depends(get_session)):
     """
@@ -79,7 +65,7 @@ async def delete_member(team_id: int, member_id: int, session: Session = Depends
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.get("/getTeamScores")
+@router.get("/getTeamScores", status_code=status.HTTP_200_OK)
 async def get_member_points(tournament_id: int, team_id: int, session: Session = Depends(get_session)):
     """
     Retrieve team members' points.
@@ -90,5 +76,19 @@ async def get_member_points(tournament_id: int, team_id: int, session: Session =
         if points is None:
             raise HTTPException(status_code=404, detail="Records not found")
         return {"points": points}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/{team_id}", status_code=status.HTTP_200_OK, response_model=TeamResponse)
+async def get_team(team_id: Annotated[int, Path(description="ID of the team to fetch")], session: Session = Depends(get_session)):
+    """
+    Retrieve a team by ID.
+    This endpoint returns the details of a team specified by its ID.
+    """
+    try:
+        team = team_server.get_team(team_id, session)
+        if not team:
+            raise HTTPException(status_code=404, detail="Team not found")
+        return team
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

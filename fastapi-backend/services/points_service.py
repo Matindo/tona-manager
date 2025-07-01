@@ -38,7 +38,7 @@ def get_member_points(member_id: int, session: Session) -> List[PointsResponse]:
 
 def get_tournament_points(tourn_id: int, session: Session) -> List[PointsResponse]:
   points = []
-  if tona_server.get_tournament(tourn_id, session) is None:
+  if tona_server.get_tournament_by_id(tourn_id, session) is None:
     raise ValueError(f"Tournament with ID {tourn_id} does not exist")
   statement = select(Points).where(Points.tournament_id == tourn_id)
   results = session.exec(statement).all()
@@ -50,7 +50,7 @@ def get_tournament_points(tourn_id: int, session: Session) -> List[PointsRespons
 
 def get_tournament_round_points(tourn_id: int, round: int, session: Session) -> List[PointsResponse]:
   points = []
-  if tona_server.get_tournament(tourn_id, session) is None:
+  if tona_server.get_tournament_by_id(tourn_id, session) is None:
     raise ValueError(f"Tournament with ID {tourn_id} does not exist")
   statement = select(Points).where(
     Points.tournament_id == tourn_id,
@@ -67,7 +67,7 @@ def get_member_tournament_points(tourn_id: int, member_id: int, session: Session
   points = []
   if member_server.get_team_member(member_id, session) is None:
     raise ValueError(f"Member with ID {member_id} does not exist")
-  if tona_server.get_tournament(tourn_id, session) is None:
+  if tona_server.get_tournament_by_id(tourn_id, session) is None:
     raise ValueError(f"Tournament with ID {tourn_id} does not exist")
   statement = select(Points).where(
     Points.member_id == member_id,
