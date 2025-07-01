@@ -15,7 +15,7 @@ def get_team_member(team_member_id: int, session: Session) -> TeamMemberResponse
   return TeamMemberResponse(**result.model_dump()) if result else None
 
 def update_team_member(team_member_update: TeamMemberUpdate, session: Session) -> TeamMemberResponse | None:
-  existing_member = get_team_member(team_member_update.member_id, session)
+  existing_member = get_db_member(team_member_update.member_id, session)
   if not existing_member:
     return None
   update_data = team_member_update.model_dump(exclude_unset=True)
@@ -33,3 +33,11 @@ def delete_team_member(team_member_id: int, session: Session) -> bool:
   session.delete(existing_member)
   session.commit()
   return True
+
+
+# --------------------------------------------------------------------------------  #
+### Helper functions ###
+# --------------------------------------------------------------------------------  #
+def get_db_member(member_id: int, session: Session) -> TeamMember | None:
+  statement = select(TeamMember).where(TeamMember.member_id == member_id)
+  return session.exec(statement).first()

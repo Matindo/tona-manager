@@ -1,13 +1,16 @@
 from models.team import Team, TeamCreate, TeamResponse, TeamUpdate
-from models.team_member import TeamMemberResponse, TeamMemberCreate
+from models.team_member import TeamMemberResponse, TeamMemberCreate, TeamMemberUpdate
+from models.points import PointsResponse
 from typing import List
 from sqlmodel import select, Session
 import services.member_service as member_server 
+import services.tona_service as tona_server
+import services.points_service as points_server
 
 def create_team(team_create: TeamCreate, session: Session) -> TeamResponse:
   statement = select(Team).where(Team.name == team_create.name)
-  existing_tournament = session.exec(statement).first()
-  if existing_tournament:
+  existing_team = session.exec(statement).first()
+  if existing_team:
     raise ValueError(f"Team with name '{team_create.name}' already exists.")
   members_list = []
   team = team_create.model_dump()
@@ -54,16 +57,32 @@ def update_team(team: TeamUpdate, session: Session) -> TeamResponse | None:
   result = get_team(existing_team.team_id, session)
   return result
 
-def add_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
-  team = get_team(team_id, session)
+def add_team_member(team_id: int, member: TeamMemberCreate, session: Session) -> TeamResponse | None:
+  team = get_db_team(team_id, session)
   if not team:
     return None
-  member_list = convert_members_to_ids(team.members)
-  if member_id in member_list:
-    raise ValueError(f"Member {member_id} already exists in team {team_id}")
-  member_list.append(member_id)
+  member_list = team.members
+  created_member = member_server.create_team_member(member, session)
+  if not created_member:
+    raise ValueError("Failed to create team member")
+  member_list.append(created_member.member_id)
   team_update = TeamUpdate(team_id=team.team_id, members=member_list)
   return update_team(team_update, session)
+
+def update_team_member(team_id: int, member: TeamMemberUpdate, session: Session) -> TeamResponse | None:
+  team_exist = get_db_team(team_id, session)
+  if not team_exist:
+    return None
+  member_exist = member_server.get_team_member(member.member_id, session)
+  if not member_exist:
+    raise ValueError(f"Member with ID {member.member_id} does not exist")
+  if member_exist.teamId != team_id:
+    print(f"Member's teamID: {member_exist.teamId}, Team ID: {team_id}")
+    raise ValueError(f"Member {member.member_id} does not belong to team {team_id}")
+  updated_member = member_server.update_team_member(member, session)
+  if not updated_member:
+    raise ValueError("Failed to update team member")
+  return get_team(team_id, session)
 
 def remove_team_member(team_id: int, member_id: int, session: Session) -> TeamResponse | None:
   team = get_team(team_id, session)
@@ -71,7 +90,7 @@ def remove_team_member(team_id: int, member_id: int, session: Session) -> TeamRe
     return None
   member_list = convert_members_to_ids(team.members)
   if member_id not in member_list:
-    return None
+    raise ValueError(f"Member {member_id} is not a member of your team {team_id}")
   member_list.remove(member_id)
   team_update = TeamUpdate(team_id=team.team_id, members=member_list)
   return update_team(team_update, session)
@@ -87,6 +106,19 @@ def get_all_teams(session: Session) -> List[TeamResponse]:
     team_list.append(TeamResponse(**team_data))
   return team_list
 
+def get_team_points(tourn_id: int, team_id: int, session: Session) -> List[PointsResponse]:
+  points = []
+  if tona_server.get_tournament_by_id(tourn_id, session) is None:
+    raise ValueError(f"Tournament with ID {tourn_id} does not exist")
+  team = get_db_team(team_id, session)
+  if not team:
+    raise ValueError(f"Team with ID {team_id} does not exist")
+  for member in team.members:
+    member_points = points_server.get_member_tournament_points(tourn_id, member, session)
+    if member_points:
+      points.extend(member_points)
+  return points
+    
 def delete_team(team_id: int, session: Session) -> bool:
   team = get_team(team_id, session)
   if not team:
