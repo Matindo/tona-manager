@@ -145,17 +145,3 @@ def end_tournament(tournament_id: int, session : Session = Depends(get_session))
         return {"message": "Tournament ended successfully"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-
-@router.delete("/deleteTournament", status_code=status.HTTP_202_ACCEPTED)
-def delete_tournament(tournament_id: int, session: Session = Depends(get_session)):
-    """
-    Delete a tournament.
-    This endpoint allows deleting a tournament specified by its ID.
-    """
-    try:
-        result = tona_server.delete_tournament(tournament_id, session)
-        if not result:
-            raise HTTPException(status_code=404, detail="Tournament not found")
-        return {"message": "Tournament deleted successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))

@@ -14,6 +14,14 @@ class Points(PointsBase, table=True):
     
 class PointsCreate(PointsBase):
   pass
+
+class PointsUpdate(PointsBase):
+  points_id: int
+  tournament_id: int
+  member_id: int
+  round: str
+  points: float
+  created_at: str | None = Field(default=datetime.now().isoformat(" ", "seconds"), description="Timestamp when the points were recorded")
  
 class PointsResponse(Points):
   pass
