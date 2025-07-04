@@ -14,6 +14,14 @@ def get_team_member(team_member_id: int, session: Session) -> TeamMemberResponse
   result = session.exec(statement).first()
   return TeamMemberResponse(**result.model_dump()) if result else None
 
+def get_all_members(session: Session) -> List[TeamMemberResponse]:
+  members = []
+  statement = select(TeamMember)
+  results = session.exec(statement).all()
+  for member in results:
+    members.append(TeamMemberResponse(**member.model_dump()))
+  return members
+
 def update_team_member(team_member_update: TeamMemberUpdate, session: Session) -> TeamMemberResponse | None:
   existing_member = get_db_member(team_member_update.member_id, session)
   if not existing_member:

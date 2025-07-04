@@ -87,10 +87,75 @@ def get_member_tournament_points(tourn_id: int, member_id: int, session: Session
     points.append(PointsResponse(**result.model_dump()))
   return points
 
+def get_all_points(session: Session) -> List[PointsResponse]:
+  points = []
+  statement = select(Points)
+  results = session.exec(statement).all()
+  if not results:
+    return points
+  for result in results:
+    points.append(PointsResponse(**result.model_dump()))
+  return points
+
+def delete_member_points(member_id: int, session: Session) -> bool:
+  existing_points = session.exec(select(Points).where(Points.member_id == member_id)).all()
+  if not existing_points:
+    raise ValueError(f"No points found for member with ID {member_id}")
+  for point in existing_points:
+    session.delete(point)
+    session.commit()
+  if get_member_points(member_id, session):
+    raise ValueError(f"Failed to delete all points for member with ID {member_id}")
+  return True
+
+def delete_tournament_points(tourn_id: int, session: Session) -> bool:
+  existing_points = session.exec(select(Points).where(Points.tournament_id == tourn_id)).all()
+  if not existing_points:
+    raise ValueError(f"No points found for tournament with ID {tourn_id}")
+  for point in existing_points:
+    session.delete(point)
+    session.commit()
+  if get_tournament_points(tourn_id, session):
+    raise ValueError(f"Failed to delete all points for tournament with ID {tourn_id}")
+  return True
+
+def delete_tournament_round_points(tourn_id: int, round: str, session: Session) -> bool:
+  existing_points = session.exec(select(Points).where(Points.tournament_id == tourn_id, Points.round == round)).all()
+  if not existing_points:
+    raise ValueError(f"No points found for tournament with ID {tourn_id} and round {round}")
+  for point in existing_points:
+    session.delete(point)
+    session.commit()
+  if get_tournament_round_points(tourn_id, round, session):
+    raise ValueError(f"Failed to delete all points for tournament with ID {tourn_id} and round {round}")
+  return True
+
+def delete_member_tournament_points(tourn_id: int, member_id: int, session: Session) -> bool:
+  existing_points = session.exec(select(Points).where(Points.tournament_id == tourn_id, Points.member_id == member_id)).all()
+  if not existing_points:
+    raise ValueError(f"No points found for tournament with ID {tourn_id} and member with ID {member_id}")
+  for point in existing_points:
+    session.delete(point)
+    session.commit()
+  if get_member_tournament_points(tourn_id, member_id, session):
+    raise ValueError(f"Failed to delete all points for tournament with ID {tourn_id} and member with ID {member_id}")
+  return True
+
 def delete_points(points_id: int, session: Session) -> bool:
   existing_points = session.get(Points, points_id)
   if not existing_points:
     raise ValueError(f"Points with ID {points_id} does not exist")
   session.delete(existing_points)
   session.commit()
+  return True
+
+def delete_all_points(session: Session) -> bool:
+  existing_points = session.exec(select(Points)).all()
+  if not existing_points:
+    raise ValueError("No points found in the database")
+  for point in existing_points:
+    session.delete(point)
+    session.commit()
+  if get_all_points(session):
+    raise ValueError("Failed to delete all points from the database")
   return True

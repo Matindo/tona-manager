@@ -127,6 +127,16 @@ def delete_team(team_id: int, session: Session) -> bool:
   session.commit()
   return True
 
+def delete_all_teams(session: Session) -> bool:
+  existing_teams = session.exec(select(Team)).all()
+  if not existing_teams:
+    raise ValueError("No teams found in the database")
+  for team in existing_teams:
+    delete_team(team.team_id, session)
+  if get_all_teams(session):
+    raise ValueError("Failed to delete all teams from the database")
+  return True
+
 # --------------------------------------------------------------------------------  #
 ### Helper functions ###
 # --------------------------------------------------------------------------------  #

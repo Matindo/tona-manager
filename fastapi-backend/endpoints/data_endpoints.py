@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, Path, status
 from services.db_service import get_session
 from sqlmodel import Session
-from typing import Annotated
+from typing import Annotated, List
 from models.team import TeamUpdate, TeamResponse
 from models.team_member import TeamMemberUpdate, TeamMemberResponse
 from models.points import PointsCreate, PointsUpdate, PointsResponse
@@ -33,6 +33,20 @@ def delete_tournament(tournament_id: int, session: Session = Depends(get_session
 # ----------------------------------------------------------------------- #
 ## Team Endpoints
 # ----------------------------------------------------------------------- #
+@router.get("/getAllTeams", response_model=List[TeamResponse], status_code=status.HTTP_200_OK)
+def get_all_teams(session: Session = Depends(get_session)):
+  """
+  Get all teams.
+  This endpoint retrieves a list of all teams in the database.
+  """
+  try:
+    teams = team_server.get_all_teams(session)
+    if len(teams) < 1:
+      raise HTTPException(status_code=404, detail="No teams found")
+    return teams
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+
 @router.delete("/deleteTeam", status_code=status.HTTP_200_OK)
 async def delete_member(team_id: int, session: Session = Depends(get_session)):
   """
@@ -46,13 +60,55 @@ async def delete_member(team_id: int, session: Session = Depends(get_session)):
     return {"message": "Team deleted successfully"}
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteAllTeams", status_code=status.HTTP_200_OK)
+def delete_all_teams(session: Session = Depends(get_session)):
+  """
+  Delete all teams.
+  This endpoint allows deleting all teams from the database.
+  """
+  try:
+    result = team_server.delete_all_teams(session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No teams found to delete")
+    return {"message": "All teams deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
 
 
 # ----------------------------------------------------------------------- #
 ## Member Endpoints
 # ----------------------------------------------------------------------- #
+@router.get("/getMember/{member_id}", response_model=TeamMemberResponse, status_code=status.HTTP_200_OK)
+def get_member_by_id(member_id: Annotated[int, Path(description="ID of the team member to retrieve")], session: Session = Depends(get_session)):
+  """
+  Get a team member by ID.
+  This endpoint retrieves a team member's details using their ID.
+  """
+  try:
+    member = member_server.get_team_member(member_id, session)
+    if not member:
+      raise HTTPException(status_code=404, detail="Team member not found")
+    return member
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.get("/getAllMembers", response_model=List[TeamMemberResponse], status_code=status.HTTP_200_OK)
+def get_all_members(session: Session = Depends(get_session)):
+  """
+  Get all team members.
+  This endpoint retrieves a list of all team members in the database.
+  """
+  try:
+    members = member_server.get_all_members(session)
+    if len(members) < 1:
+      raise HTTPException(status_code=404, detail="No team members found")
+    return members
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+
 @router.delete("/deleteMember", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_member(member_id: int, session: Session = Depends(get_session)):
+def delete_member(member_id: int, session: Session = Depends(get_session)):
   """
   Delete a member from the records.
   This endpoint allows deleting a member from your database.
@@ -96,17 +152,157 @@ def edit_member_points(points: PointsUpdate, session: Session = Depends(get_sess
     return {"message": "Points edited successfully", "points": result}
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
+  
+@router.get("/getMemberPoints/{member_id}", response_model=List[PointsResponse], status_code=status.HTTP_200_OK)
+def get_member_points(member_id: Annotated[int, Path(description="ID of the team member to retrieve points for")], session: Session = Depends(get_session)):
+  """
+  Get all points for a specific member.
+  This endpoint retrieves all points assigned to a specific member.
+  """
+  try:
+    points = points_server.get_member_points(member_id, session)
+    if not points:
+      raise HTTPException(status_code=404, detail="No points found for this member")
+    return points
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.get("/getTournamentPoints/{tourn_id}", response_model=List[PointsResponse], status_code=status.HTTP_200_OK)
+def get_tournament_points(tournament_id: Annotated[int, Path(description="ID of the tournament to retrieve points for")], session: Session = Depends(get_session)):
+  """
+  Get all tournament points.
+  This endpoint retrieves all points recorded for a specific tournament.
+  """
+  try:
+    points = points_server.get_tournament_points(tournament_id, session)
+    if not points:
+      raise HTTPException(status_code=404, detail="No points found for this tournament")
+    return points
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.post("/getTournamentRoundPoints/", response_model=List[PointsResponse], status_code=status.HTTP_200_OK)
+def get_tournament_round_points(tournament_id: int, round: int, session: Session = Depends(get_session)):
+  """
+  Get tournament round points.
+  This endpoint retrieves all points recorded for a specific round in a tournament.
+  """
+  try:
+    points = points_server.get_tournament_round_points(tournament_id, round, session)
+    if not points:
+      raise HTTPException(status_code=404, detail="No points found for this tournament and round")
+    return points
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.post("/getMemberTournamentPoints/", response_model=List[PointsResponse], status_code=status.HTTP_200_OK)
+def get_member_tournament_points(tournament_id: int, member_id: int, session: Session = Depends(get_session)):
+  """
+  Get member's tournament points.
+  This endpoint retrieves all points achieved by a specific member in a tournament.
+  """
+  try:
+    points = points_server.get_member_tournament_points(tournament_id, member_id, session)
+    if not points:
+      raise HTTPException(status_code=404, detail="No points found for this member in the tournament")
+    return points
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.get("/getAllMembersPoints", response_model=List[PointsResponse], status_code=status.HTTP_200_OK)
+def get_all_points(session: Session = Depends(get_session)):
+  """
+  Get all points.
+  This endpoint retrieves all points recorded in the database.
+  """
+  try:
+    points = points_server.get_all_points(session)
+    if not points:
+      raise HTTPException(status_code=404, detail="No points found in the database")
+    return points
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
     
-@router.post("/deleteMemberScore", status_code=status.HTTP_202_ACCEPTED)
+@router.delete("/deleteScore", status_code=status.HTTP_202_ACCEPTED)
 def delete_member_points(points_id: int, session: Session = Depends(get_session)):
   """
-  Delete existing member points.
-  This endpoint removes existing member points from your database.
+  Delete points record.
+  This endpoint removes existing points' record from your database.
   """
   try:
     result = points_server.delete_points(points_id, session)
     if not result:
       raise HTTPException(status_code=404, detail="Record not found")
     return {"message": "Points deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteMemberPoints", status_code=status.HTTP_200_OK)
+def delete_member_points(member_id: int, session: Session = Depends(get_session)):
+  """
+  Delete a member's points.
+  This endpoint removes all points' records for a specified member from your database.
+  """
+  try:
+    result = points_server.delete_member_points(member_id, session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No points found for this member")
+    return {"message": "All points for the member deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteTournamentPoints", status_code=status.HTTP_200_OK)
+def delete_tournament_points(tournament_id: int, session: Session = Depends(get_session)):
+  """
+  Delete tournament points.
+  This endpoint removes all points' records for a specified tournament from your database.
+  """
+  try:
+    result = points_server.delete_tournament_points(tournament_id, session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No points found for this tournament")
+    return {"message": "All points for the tournament deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteTournamentRoundPoints", status_code=status.HTTP_200_OK)
+def delete_tournament_round_points(tournament_id: int, round: str, session: Session = Depends(get_session)):
+  """
+  Delete round points in tournament.
+  This endpoint removes all points' records for a specified round in a tournament from your database.
+  """
+  try:
+    result = points_server.delete_tournament_round_points(tournament_id, round, session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No points found for this tournament and round")
+    return {"message": "All points for the tournament round deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteMemberTournamentPoints", status_code=status.HTTP_200_OK)
+def delete_member_tournament_points(tournament_id: int, member_id: int, session: Session = Depends(get_session)):
+  """
+  Delete member's points in tournament.
+  This endpoint removes all points' records for a specified member in a tournament from your database.
+  """
+  try:
+    result = points_server.delete_member_tournament_points(tournament_id, member_id, session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No points found for this member in the tournament")
+    return {"message": "All points for the member in the tournament deleted successfully"}
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+  
+@router.delete("/deleteAllPoints", status_code=status.HTTP_200_OK)
+def delete_all_points(session: Session = Depends(get_session)):
+  """
+  Delete all points.
+  This endpoint removes all points' records from your database.
+  """
+  try:
+    result = points_server.delete_all_points(session)
+    if not result:
+      raise HTTPException(status_code=404, detail="No points found to delete")
+    return {"message": "All points deleted successfully"}
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
