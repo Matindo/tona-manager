@@ -9,18 +9,6 @@ from services.db_service import get_session
 
 router = APIRouter()
 
-@router.get("/getTournaments", response_model=list[TournamentResponse], status_code=status.HTTP_200_OK)
-def get_all_tournaments(session: Session = Depends(get_session)):
-    """
-    Retrieve all tournaments.
-    This endpoint returns a list of all tournaments in the system.
-    """
-    try:
-        tournaments = tona_server.get_tournaments(session)
-        return tournaments
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
 @router.get("/{tournament_id}", response_model=TournamentResponse, status_code=status.HTTP_200_OK)
 def get_tournament(tournament_id: Annotated[int, Path(description="The tournament ID")], session: Session = Depends(get_session)):
     """

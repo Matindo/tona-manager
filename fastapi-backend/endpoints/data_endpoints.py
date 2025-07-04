@@ -2,8 +2,9 @@ from fastapi import APIRouter, HTTPException, Depends, Path, status
 from services.db_service import get_session
 from sqlmodel import Session
 from typing import Annotated, List
-from models.team import TeamUpdate, TeamResponse
-from models.team_member import TeamMemberUpdate, TeamMemberResponse
+from models.team import TeamResponse
+from models.team_member import TeamMemberResponse
+from models.tournament import TournamentResponse
 from models.points import PointsCreate, PointsUpdate, PointsResponse
 import services.team_service as team_server
 import services.member_service as member_server
@@ -15,6 +16,18 @@ router = APIRouter()
 # ----------------------------------------------------------------------- #
 ## Tournament Endpoints
 # ----------------------------------------------------------------------- #
+@router.get("/getTournaments", response_model=list[TournamentResponse], status_code=status.HTTP_200_OK)
+def get_all_tournaments(session: Session = Depends(get_session)):
+  """
+  Retrieve all tournaments.
+  This endpoint returns a list of all tournaments in the system.
+  """
+  try:
+    tournaments = tona_server.get_tournaments(session)
+    return tournaments
+  except Exception as e:
+    raise HTTPException(status_code=400, detail=str(e))
+
 @router.delete("/deleteTournament", status_code=status.HTTP_202_ACCEPTED)
 def delete_tournament(tournament_id: int, session: Session = Depends(get_session)):
   """

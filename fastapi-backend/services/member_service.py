@@ -35,7 +35,7 @@ def update_team_member(team_member_update: TeamMemberUpdate, session: Session) -
   return TeamMemberResponse(**existing_member.model_dump())
 
 def delete_team_member(team_member_id: int, session: Session) -> bool:
-  existing_member = get_team_member(team_member_id, session)
+  existing_member = get_db_member(team_member_id, session)
   if not existing_member:
     return False
   session.delete(existing_member)

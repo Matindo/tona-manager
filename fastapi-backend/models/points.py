@@ -8,11 +8,11 @@ class PointsBase(SQLModel):
   round: str | None = Field(default=None, description="The round of a particular stage eg P3(round 3 of Prelims), Semi-Finals")
   points: float | None = Field(default=0.0, description="Points scored by the member in the tournament stage and round")
   created_at: str | None = Field(default=None, description="Timestamp when the points were recorded")
-  updated_at: str | None = Field(default=None, description="Timestamp when the points were last updated")
 
 class Points(PointsBase, table=True):
   points_id: int | None = Field(default=None, primary_key=True)
-    
+  updated_at: str | None = Field(default=None, description="Timestamp when the points were last updated")
+
 class PointsCreate(PointsBase):
   pass
 
@@ -23,7 +23,7 @@ class PointsUpdate(PointsBase):
   round: str
   points: float
   created_at: str | None = None
-  updated_at: str | None = None
+  updated_at: str | None = datetime.now().isoformat(" ", "seconds")
  
 class PointsResponse(Points):
   pass
