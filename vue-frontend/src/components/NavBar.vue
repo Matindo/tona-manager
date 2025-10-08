@@ -51,7 +51,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      user: 'USER'
+      user: 'ACTIVE' ? 'user/USER' : null
     })
   },
   methods: {

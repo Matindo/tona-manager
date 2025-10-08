@@ -1,11 +1,11 @@
 <template>
   <div id="tournament_view">
-    <h3>{{ tournament.tournName }}</h3>
+    <h3>{{ tournament.name }}</h3>
     <div class="table-row">
-      <div class="table-column name">{{ tournament.tournName }}</div>
-      <div class="table-column region">{{ tournament.tournPlace }}</div>
-      <div class="table-column type">{{ tournament.tournType }}</div>
-      <div class="table-column date">{{ tournament.startDate }}</div>
+      <div class="table-column name">{{ tournament.name }}</div>
+      <div class="table-column region">{{ tournament.region }}</div>
+      <div class="table-column type">{{ tournament.type }}</div>
+      <div class="table-column date">{{ tournament.start_date }}</div>
     </div>
   </div>
 </template>
@@ -23,16 +23,48 @@ export default {
   },
   computed: {
     ...mapGetters({
-      tournament: 'TOURNAMENT'
+      tournament: 'tona/TOURNAMENT',
+      message: 'tona/MESSAGE'
     })
   },
   methods: {
+    loadTeams: async function () {
+      this.title = 'Load Teams'
+      await this.$store.dispatch('tona/fetchTeams') 
+    },
     startPrem: function () {
       // ask how many rounds there will be
     },
     popPrem: function () {
       // create a modal to ask if teams aer going to knockout rounds
     }
+  },
+  watch: {
+    message: {
+      immediate: true,
+      handler: function (newVal, oldVal) {
+        if (newVal !== oldVal && newVal.text !== '') {
+          this.$bvToast.toast(newVal.text, {
+            title: this.title,
+            variant: newVal.type,
+            autoHideDelay: 5000,
+            solid: true,
+            appendToast: true
+          })
+        }
+      }
+    }
+  },
+  mounted: async function () {
+    this.title = 'Load Tournament'
+    this.$bvToast.toast(this.message.text, {
+      title: this.title,
+      variant: this.message.type,
+      autoHideDelay: 5000,
+      solid: true,
+      appendToast: true
+    })
+    await this.loadTeams()
   }
 }
 </script>

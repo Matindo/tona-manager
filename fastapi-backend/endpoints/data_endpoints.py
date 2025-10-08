@@ -25,6 +25,8 @@ def get_all_tournaments(session: Session = Depends(get_session)):
   try:
     tournaments = tona_server.get_tournaments(session)
     return tournaments
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -39,6 +41,8 @@ def delete_tournament(tournament_id: int, session: Session = Depends(get_session
     if not result:
       raise HTTPException(status_code=404, detail="Tournament not found")
     return {"message": "Tournament deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -57,6 +61,8 @@ def get_all_teams(session: Session = Depends(get_session)):
     if len(teams) < 1:
       raise HTTPException(status_code=404, detail="No teams found")
     return teams
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -71,6 +77,8 @@ async def delete_member(team_id: int, session: Session = Depends(get_session)):
     if not result:
       raise HTTPException(status_code=404, detail="Team not found")
     return {"message": "Team deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -85,6 +93,8 @@ def delete_all_teams(session: Session = Depends(get_session)):
     if not result:
       raise HTTPException(status_code=404, detail="No teams found to delete")
     return {"message": "All teams deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -103,6 +113,8 @@ def get_member_by_id(member_id: Annotated[int, Path(description="ID of the team 
     if not member:
       raise HTTPException(status_code=404, detail="Team member not found")
     return member
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -117,6 +129,8 @@ def get_all_members(session: Session = Depends(get_session)):
     if len(members) < 1:
       raise HTTPException(status_code=404, detail="No team members found")
     return members
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -131,6 +145,8 @@ def delete_member(member_id: int, session: Session = Depends(get_session)):
     if not result:
       raise HTTPException(status_code=404, detail="Team member not found")
     return {"message": "Member deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
 
@@ -149,6 +165,8 @@ def add_member_points(points: PointsCreate, session: Session = Depends(get_sessi
     if not result:
       raise HTTPException(status_code=404, detail="Member not found")
     return {"message": "Points added successfully", "points": result}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
       
@@ -163,6 +181,8 @@ def edit_member_points(points: PointsUpdate, session: Session = Depends(get_sess
     if not result:
       raise HTTPException(status_code=404, detail="Record not found")
     return {"message": "Points edited successfully", "points": result}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -177,6 +197,8 @@ def get_member_points(member_id: Annotated[int, Path(description="ID of the team
     if not points:
       raise HTTPException(status_code=404, detail="No points found for this member")
     return points
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -191,6 +213,8 @@ def get_tournament_points(tournament_id: Annotated[int, Path(description="ID of 
     if not points:
       raise HTTPException(status_code=404, detail="No points found for this tournament")
     return points
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -205,6 +229,8 @@ def get_tournament_round_points(tournament_id: int, round: int, session: Session
     if not points:
       raise HTTPException(status_code=404, detail="No points found for this tournament and round")
     return points
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -219,6 +245,8 @@ def get_member_tournament_points(tournament_id: int, member_id: int, session: Se
     if not points:
       raise HTTPException(status_code=404, detail="No points found for this member in the tournament")
     return points
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -233,6 +261,8 @@ def get_all_points(session: Session = Depends(get_session)):
     if not points:
       raise HTTPException(status_code=404, detail="No points found in the database")
     return points
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
     
@@ -247,6 +277,8 @@ def delete_member_points(points_id: int, session: Session = Depends(get_session)
     if not result:
       raise HTTPException(status_code=404, detail="Record not found")
     return {"message": "Points deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -261,6 +293,8 @@ def delete_member_points(member_id: int, session: Session = Depends(get_session)
     if not result:
       raise HTTPException(status_code=404, detail="No points found for this member")
     return {"message": "All points for the member deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -275,6 +309,8 @@ def delete_tournament_points(tournament_id: int, session: Session = Depends(get_
     if not result:
       raise HTTPException(status_code=404, detail="No points found for this tournament")
     return {"message": "All points for the tournament deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -289,6 +325,8 @@ def delete_tournament_round_points(tournament_id: int, round: str, session: Sess
     if not result:
       raise HTTPException(status_code=404, detail="No points found for this tournament and round")
     return {"message": "All points for the tournament round deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -303,6 +341,8 @@ def delete_member_tournament_points(tournament_id: int, member_id: int, session:
     if not result:
       raise HTTPException(status_code=404, detail="No points found for this member in the tournament")
     return {"message": "All points for the member in the tournament deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))
   
@@ -317,5 +357,7 @@ def delete_all_points(session: Session = Depends(get_session)):
     if not result:
       raise HTTPException(status_code=404, detail="No points found to delete")
     return {"message": "All points deleted successfully"}
+  except HTTPException:
+    raise
   except Exception as e:
     raise HTTPException(status_code=400, detail=str(e))

@@ -23,7 +23,7 @@ const routes = [
     component: () => import('../views/AccountView.vue')
   },
   {
-    path: '/tournament/:tournId?',
+    path: '/tournament/:tournId',
     name: 'tournament',
     component: () => import('../views/TournamentView.vue')
   }

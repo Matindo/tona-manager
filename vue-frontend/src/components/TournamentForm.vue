@@ -27,7 +27,9 @@
       </div> -->
     </div>
     <div class="form-buttons">
-      <b-button type="submit" variant="outline-success" pill>Start Tournament</b-button>
+      <b-button type="submit" variant="outline-success" pill>
+        <span v-if="new Date(tournament.start).toLocaleDateString()==today.toLocaleDateString() ">Start</span><span v-else>Create</span>
+         Tournament</b-button>
       <b-button type="reset" variant="outline-danger" pill>Reset Form</b-button>
     </div>
   </b-form>

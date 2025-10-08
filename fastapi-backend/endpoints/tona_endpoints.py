@@ -20,6 +20,8 @@ def get_tournament(tournament_id: Annotated[int, Path(description="The tournamen
         if not tournament:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return tournament
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -45,6 +47,8 @@ def update_tournament(tournament: TournamentUpdate, session: Session = Depends(g
         if not updated_tournament:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return updated_tournament
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -57,9 +61,7 @@ def get_teams_in_tournament(tournament_id: Annotated[int, Path(description="Tour
     try:
         teams = tona_server.get_teams_in_tournament(tournament_id, session)
         if not teams:
-            raise HTTPException(status_code=404, detail="Tournament not found")
-        if len(teams) == 0:
-            raise HTTPException(status_code=204, detail="No teams found for this tournament")
+            raise HTTPException(status_code=451, detail="No teams found for this tournament")
         return {"teams": teams}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -75,6 +77,8 @@ def add_team_to_tournament(tournament_id: int, team: TeamCreate, session : Sessi
         if not result:
             raise HTTPException(status_code=404, detail="Tournament not found")
         return { "message": "Team added to tournament successfully" }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     
@@ -89,6 +93,8 @@ def add_teams_to_tournament(tournament_id: int, teams: list[TeamCreate], session
         if not result:
             raise HTTPException(status_code=404, detail="Tournament or teams not found")
         return {"message": "Teams added to tournament successfully"}
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
     

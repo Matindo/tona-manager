@@ -12,16 +12,16 @@
           <div class="table-column name">Tournament Name</div>
           <div class="table-column region">Region</div>
           <div class="table-column type">Type</div>
-          <div class="table-column date">Start Date</div>
+          <div class="table-column date">Status</div>
           <div class="table-column actions">Actions</div>
         </div>
-        <div class="table-row" v-for="(tourn, index) in tournaments" :key="index">
-          <div class="table-column name">{{ tourn.tournName }}</div>
-          <div class="table-column region">{{ tourn.tournPlace }}</div>
-          <div class="table-column type">{{ tourn.tournType }}</div>
-          <div class="table-column date">{{ tourn.startDate }}</div>
+        <div class="table-row" v-for="(tourn, index) in tournaments" :key="index" :class="index % 2 === 1 ? 'tr-dark' : 'tr-light'">
+          <div class="table-column name">{{ tourn.name }}</div>
+          <div class="table-column region">{{ tourn.region }}</div>
+          <div class="table-column type">{{ showFullType(tourn.type) }}</div>
+          <div class="table-column date">{{ tourn.status }}</div>
           <div class="table-column actions">
-            <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournName)"><b-icon icon="box-arrow-in-right"></b-icon> Open</b-button>
+            <b-button variant="outline-info" size="sm" @click="openTournament(tourn.tournament_id)"><b-icon icon="box-arrow-in-right"></b-icon> Open</b-button>
           </div>
         </div>
       </div>
@@ -51,22 +51,58 @@ export default {
   },
   computed: {
     ...mapGetters({
-      tournaments: 'TOURNAMENTS'
+      tournaments: 'TOURNAMENTS',
+      tona_messages: 'tona/MESSAGE'
     })
   },
   methods: {
-    createTournament: function (tournament) {
+    createTournament: async function (tournament) {
       const tourn = {}
-      tourn.tournName = tournament.tName
-      tourn.tournPlace = tournament.tPlace
-      tourn.tournType = tournament.tType
-      tourn.startDate = tournament.start
-      tourn.status = 'created'
-      this.$store.dispatch('CREATE_TOURNAMENT', tourn)
+      tourn.name = tournament.tName
+      tourn.region = tournament.tPlace
+      tourn.type = tournament.tType
+      tourn.start_date = new Date(tournament.start).toISOString().replace("T", " ").substring(0, 19)
+      await this.$store.dispatch('tona/createTona', tourn)
+      this.$bvToast.toast(this.tona_messages.text, {
+        title: 'Tournament Creation',
+        variant: this.tona_messages.type,
+        autoHideDelay: 5000,
+        solid: true,
+        appendToast: true
+      })
+      await this.$store.dispatch('REFRESH_DATA')
     },
     openTournament: async function (tourn) {
-      const currentTournament = this.tournaments.filter(tournament => tournament.tournName === tourn)
-      await this.$store.dispatch('SET_TOURNAMENT', currentTournament[0]).then(() => this.$router.push(`/tournament/${tourn.trim().split(' ').join('')}`))
+      const currentTournament = this.tournaments.filter(tournament => tournament.tournament_id === tourn)
+      if (currentTournament.length === 0) {
+        this.$bvToast.toast("Tournament not found", {
+          title: 'Open Tournament',
+          variant: 'danger',
+          autoHideDelay: 5000,
+          solid: true,
+          appendToast: true
+        })
+        return
+      } else {
+        const tourn_id = currentTournament[0].tournament_id
+        await this.$store.dispatch('tona/setTona', tourn_id)
+        this.$router.push(`/tournament/${tourn_id}`)
+      }
+    },
+    showFullType: function (tourn_type) {
+      let ttype = null
+      switch (tourn_type) {
+        case "P":
+          ttype = "Preliminaries Only"
+          break
+        case "K":
+          ttype = "Knock-outs Only"
+          break
+        default:
+          ttype = "Prelims then Knock-outs"
+          break
+      }
+      return ttype
     }
   }
 }
@@ -93,10 +129,15 @@ export default {
   width: 100%;
   align-items: center;
   justify-content: space-evenly;
-  margin-bottom: .6rem;
+  margin-bottom: .4rem;
   &.header {
     font-weight: bold;
-    background-color: hsla(0, 0%, 0%, 0.234);
+    background-color: hsla(228, 90%, 25%, 0.775);
+    color: aliceblue;
+  }
+  &.tr-dark {
+    background-color: hsla(0, 0%, 0%, 0.1);
+    padding-block: .4rem;
   }
 }
 .table-column {

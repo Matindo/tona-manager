@@ -23,18 +23,18 @@ services:
     env_file:
       - ./fastapi-backend/.env
 
-  frontend:
-    build:
-      context: ./vue-frontend
-      dockerfile: Dockerfile
-    container_name: tona_frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "8080:80"
-    env_file:
-      - ./vue-frontend/.env
+  # frontend:
+  #   build:
+  #     context: ./vue-frontend
+  #     dockerfile: Dockerfile
+  #   container_name: tona_frontend
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   ports:
+  #     - "8080:80"
+  #   env_file:
+  #     - ./vue-frontend/.env
 
 volumes:
   postgres_data:
